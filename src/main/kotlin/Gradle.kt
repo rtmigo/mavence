@@ -67,10 +67,9 @@ suspend fun GradlewFile.setVersion(newVersion: String) {
     check(this.getVersion() == newVersion) { "Failed to change version" }
 }
 
-internal fun <K, V> keysOfChanges(
-    old: Map<K, V>,
-    new: Map<K, V>,
-): List<K> =
+/// Returns all the keys that were added or removed, and also all the keys associated
+/// with values that were changed.
+internal fun <K, V> keysOfChanges(old: Map<K, V>, new: Map<K, V>): List<K> =
     (old.keys + new.keys).filter { (old[it] ?: 0) != (new[it] ?: 0) }
 
 suspend fun GradlewFile.publishAndDetect(publicationName: String): MmdlxFile {
@@ -78,7 +77,7 @@ suspend fun GradlewFile.publishAndDetect(publicationName: String): MmdlxFile {
     this.publishLocal(publicationName)
     val new = readUpdateTimes()
     val changed = keysOfChanges(old, new)
-    if (changed.size!=1)
+    if (changed.size != 1)
         throw Exception("Cannot detect what is published. Files updated: $changed")
     return changed[0]
 }
@@ -103,7 +102,12 @@ internal suspend fun GradlewFile.publishTaskName(publicationName: String?): Stri
 
     val tasks = this.tasks()
     val result = tasks.singleOrNull { it.lowercase() == taskToFindLC }
-    check(result != null) { "Task for publishing $publicationName not found in $tasks by ${this.path}." }
+    check(result != null) {
+        if (publicationName!=null)
+            "Gradle task for MavenPublication named '$publicationName' not found."
+        else
+            "Gradle task for MavenPublication not found."
+    }
     return result
 }
 

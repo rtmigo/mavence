@@ -27,16 +27,48 @@ fun readUpdateTimes(): Map<MmdlxFile, Long> =
 
 /// maven-metadata-local.xml обычно находится по соседству с единственным каталогом -
 /// тем, где сам артифакт
-fun MmdlxFile.toMavenArtifactDir(): MavenArtifactDir =
-    MavenArtifactDir(this.file.toPath().parent.listDirectoryEntries()
-               .single { it.isDirectory() })
+fun MmdlxFile.toMavenArtifactDir(): UnsignedMavenArtifactFiles =
+    UnsignedMavenArtifactFiles(this.file.toPath().parent.listDirectoryEntries()
+                                   .single { it.isDirectory() }.listDirectoryEntries())
 
-/// Каталог, в котором POM и JARы
-data class MavenArtifactDir(val path: Path) {
-    val files = path.listDirectoryEntries()
+///// Каталог, в котором POM и JARы.
+//data class MavenArtifactDir(val path: Path) {
+//    val files = path.listDirectoryEntries()
+//
+//    init {
+//        check(files.filter { it.name.endsWith(".pom") }.size == 1)
+//        check(files.any { it.name.endsWith(".jar") })
+//    }
+//}
 
+data class UnsignedMavenArtifactFiles(val files: List<Path>) {
     init {
         check(files.filter { it.name.endsWith(".pom") }.size == 1)
         check(files.any { it.name.endsWith(".jar") })
+        check(files.none { it.name.endsWith(".asc") }) // no signatures
     }
 }
+
+data class SignedMavenArtifactFiles(val files: List<Path>) {
+    init {
+        check(files.filter { it.name.endsWith(".pom") }.size == 1)
+        check(files.any { it.name.endsWith(".jar") })
+        // half of files are signatures
+        check(
+            files.filter { it.name.endsWith(".asc") }.size * 2 ==
+                files.size)
+    }
+}
+
+suspend fun UnsignedMavenArtifactFiles.sign(): SignedMavenArtifactFiles {
+    Gpg().importKeyToSystem(mavenGpgKey())
+    return SignedMavenArtifactFiles(
+        this.files.map {
+            Gpg().signFile(it, passphrase = mavenGpgPassword())
+        })
+}
+
+
+
+
+
