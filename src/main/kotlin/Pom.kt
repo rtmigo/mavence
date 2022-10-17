@@ -36,7 +36,6 @@ fun PomData.toXml(): String =
                 "dev" {
                     "name" { -dev.name }
                     dev.email?.let { "email" { -it } }
-
                 }
             }
         }
