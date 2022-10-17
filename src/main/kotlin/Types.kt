@@ -2,17 +2,20 @@ import java.net.URL
 import java.nio.file.Path
 import kotlin.io.path.*
 
+private fun looksLikeMavenAllowed(s: String): Boolean =
+    Regex("""[A-Za-z][A-Za-z0-9_\-.]*""").matchEntire(s)!=null
+
 @JvmInline
 value class Artifact(val string: String) {
     init {
-        require(string.isNotEmpty() && string[0].isLetter())
+        require(looksLikeMavenAllowed(string))
     }
 }
 
 @JvmInline
 value class Group(val string: String) {
     init {
-        require(string.isNotEmpty() && string[0].isLetter())
+        require(looksLikeMavenAllowed(string))
     }
 }
 

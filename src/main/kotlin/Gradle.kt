@@ -7,6 +7,7 @@ fun BuildGradleFile.toArtifactDir(): ArtifactDir = ArtifactDir(this.path.parent)
 
 fun Path.selfAndParents() = sequence<Path> {
     var p = this@selfAndParents.absolute()
+    require(p.exists())
     while (true) {
         yield(p)
         val newP = p.parent
@@ -65,6 +66,61 @@ suspend fun GradlewFile.setVersion(newVersion: String) {
 
     check(this.getVersion() == newVersion) { "Failed to change version" }
 }
+
+internal fun <K, V> keysOfChanges(
+    old: Map<K, V>,
+    new: Map<K, V>,
+): List<K> =
+    (old.keys + new.keys).filter { (old[it] ?: 0) != (new[it] ?: 0) }
+
+suspend fun GradlewFile.publishAndDetect(publicationName: String): MmdlxFile {
+    val old = readUpdateTimes()
+    this.publishLocal(publicationName)
+    val new = readUpdateTimes()
+    val changed = keysOfChanges(old, new)
+    if (changed.size!=1)
+        throw Exception("Cannot detect what is published. Files updated: $changed")
+    return changed[0]
+}
+
+// publishCentralPublicationToMavenLocal
+// publishToMavenLocal
+suspend fun GradlewFile.publishLocal(publicationName: String) {
+    process(
+        this.path.toString(), this.publishTaskName(publicationName),
+        directory = this.path.parent.toFile()).also {
+        check(it.resultCode == 0)
+    }
+}
+
+internal suspend fun GradlewFile.publishTaskName(publicationName: String?): String {
+    val taskToFindLC = (
+        if (publicationName == null)
+            "publishToMavenLocal"
+        else
+            "publish${publicationName}PublicationToMavenLocal")
+        .lowercase()
+
+    val tasks = this.tasks()
+    val result = tasks.singleOrNull { it.lowercase() == taskToFindLC }
+    check(result != null) { "Task for publishing $publicationName not found in $tasks by ${this.path}." }
+    return result
+}
+
+private suspend fun GradlewFile.tasks(): List<String> =
+    process(
+        this.path.toString(), "tasks",
+        directory = this.path.parent.toFile(),
+        stdout = Redirect.CAPTURE)
+        .let {
+            check(it.resultCode == 0)
+            it.output
+        }.map { it.split(" ", limit = 3) }
+        .filter { it.size >= 3 && it[1] == "-" }
+        .map { it[0] }.also {
+            check(it.contains("build"))
+        }
+
 
 private suspend fun gradleProperties(d: ArtifactDir): Map<String, String> =
     d.path.toGradlew().let {

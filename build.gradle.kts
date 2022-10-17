@@ -42,6 +42,7 @@ application {
 //}
 
 tasks.withType<Jar> {
+    // UBER JAR
     from(sourceSets.main.get().output)
     dependsOn(configurations.runtimeClasspath)
     manifest {
@@ -50,10 +51,8 @@ tasks.withType<Jar> {
 }
 
 tasks.register<Jar>("uberJar") {
-    // Вместо задания отдельных свойств
-    // this.archive*, генерирующих имя, зависящее
-    // от версии и группы я предпочитаю сделать его предельно предсказуемым: build/libs/app.jar
-    archiveFileName.set("fullapp.jar")
+    // UBER JAR
+    archiveFileName.set(project.name+".uber.jar")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from(sourceSets.main.get().output)
     exclude("META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.DSA")
