@@ -1,7 +1,9 @@
 import com.aballano.mnemonik.memoizeSuspend
-import com.github.pgreze.process.*
+import com.github.pgreze.process.Redirect
+import com.github.pgreze.process.process
 import java.nio.file.Path
-import kotlin.io.path.*
+import kotlin.io.path.absolute
+import kotlin.io.path.exists
 
 fun BuildGradleFile.toArtifactDir(): ArtifactDir = ArtifactDir(this.path.parent)
 
@@ -33,7 +35,8 @@ suspend fun ArtifactDir.gradleClean() {
         process(
             it.path.toString(),
             "clean",
-            directory = this.path.toFile())
+            directory = this.path.toFile()
+        )
     }
     check(result.resultCode == 0)
 }
@@ -41,7 +44,8 @@ suspend fun ArtifactDir.gradleClean() {
 suspend fun GradlewFile.getVersion(): String {
     val res = process(
         this.path.toString(), "--version",
-        stdout = Redirect.CAPTURE)
+        stdout = Redirect.CAPTURE
+    )
     check(res.resultCode == 0)
     // там много строк, но нам нужна "Gradle 7.4.2"
     return res.output.single { it.startsWith("Gradle ") }
@@ -61,7 +65,8 @@ suspend fun GradlewFile.setVersion(newVersion: String) {
     process(
         this.path.toString(),
         "-q", "properties",
-        directory = this.path.parent.toFile())
+        directory = this.path.parent.toFile()
+    )
         .also { check(it.resultCode == 0) }
 
     check(this.getVersion() == newVersion) { "Failed to change version" }
@@ -87,23 +92,25 @@ suspend fun GradlewFile.publishAndDetect(publicationName: String): MmdlxFile {
 suspend fun GradlewFile.publishLocal(publicationName: String) {
     process(
         this.path.toString(), this.publishTaskName(publicationName),
-        directory = this.path.parent.toFile()).also {
+        directory = this.path.parent.toFile(),
+        stdout = Redirect.Consume { System.err.print(it) }
+    ).also {
         check(it.resultCode == 0)
     }
 }
 
 internal suspend fun GradlewFile.publishTaskName(publicationName: String?): String {
     val taskToFindLC = (
-        if (publicationName == null)
-            "publishToMavenLocal"
-        else
-            "publish${publicationName}PublicationToMavenLocal")
+            if (publicationName == null)
+                "publishToMavenLocal"
+            else
+                "publish${publicationName}PublicationToMavenLocal")
         .lowercase()
 
     val tasks = this.tasks()
     val result = tasks.singleOrNull { it.lowercase() == taskToFindLC }
     check(result != null) {
-        if (publicationName!=null)
+        if (publicationName != null)
             "Gradle task for MavenPublication named '$publicationName' not found."
         else
             "Gradle task for MavenPublication not found."
@@ -115,7 +122,8 @@ private suspend fun GradlewFile.tasks(): List<String> =
     process(
         this.path.toString(), "tasks",
         directory = this.path.parent.toFile(),
-        stdout = Redirect.CAPTURE)
+        stdout = Redirect.CAPTURE
+    )
         .let {
             check(it.resultCode == 0)
             it.output
@@ -132,7 +140,8 @@ private suspend fun gradleProperties(d: ArtifactDir): Map<String, String> =
             it.path.toString(),
             "-q", "properties",
             directory = it.path.parent.toFile(),
-            stdout = Redirect.CAPTURE)
+            stdout = Redirect.CAPTURE
+        )
     }.let {
         check(it.resultCode == 0)
         it.output
