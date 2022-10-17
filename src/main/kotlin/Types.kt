@@ -67,7 +67,7 @@ value class BuildGradleFile(val path: Path) {
 @JvmInline
 value class GradlewFile(val path: Path) {
     init {
-        require(path.name == "gradlew" || path.name=="gradlew.bat")
+        require(path.name == "gradlew" || path.name == "gradlew.bat")
     }
 }
 
@@ -101,9 +101,20 @@ data class GithubRepo(val owner: String, val repo: String) {
 }
 
 
-
 data class Developer(val name: String, val email: String?) {
     val nameAndEmail get() = name + (if (email != null) " <$email>" else "")
+
+    companion object {
+        fun parse(text: String): Developer {
+            val m = Regex("([^<]+)(<.+>)?").matchEntire(text)
+            require(m != null)
+            return Developer(
+                m.groups[1]!!.value.trim(),
+                m.groups[2]?.value?.trim()?.trim('<', '>')
+            )
+        }
+    }
+
 }
 
 data class ProjectMeta(
@@ -129,49 +140,3 @@ class PackageImpl(
     override val bundle: JarFile?,
 ) : Package
 
-//class StagedPackage: Package
-
-// class ProjectMeta(NamedTuple):
-//    """Включает все основные данные, необходимые для POM XML, кроме версии.
-//    Это позволит однажды задать объект `Pom` для объекта, а версию выяснять
-//    в последний момент - прямо во время билда."""
-//    # group: Group
-//    # artifact: Artifact
-//    description: str
-//    license_name: str
-//    github: GithubRepo
-//    devs: list[Developer]
-//    name: str | None = None  # по умолчанию возьмём artifact
-//    homepage: str | None = None  # по умолчанию возьмём страницу гитхаба
-
-// class Developer(NamedTuple):
-//    name: str
-//    email: str
-//    id: str | None = None
-//    organization_name: str | None = None
-//    organization_url: str | None = None
-//
-//    @property
-//    def name_and_email(self) -> str:
-//        return self.name + " <" + self.email + ">"
-
-// Artifact = NewType('Artifact', str)
-//Group = NewType('Group', str)
-//Version = NewType('Version', str)
-//
-//JarFile = NewType('JarFile', Path)
-//PomFile = NewType('PomFile', Path)
-//SignatureFile = NewType('SignatureFile', Path)
-//
-//MavenUrl = NewType('MavenUrl', str)
-//StagingMavenUrl = NewType('StagingMavenUrl', MavenUrl)
-//
-//ProjectRootDir = NewType('ProjectRootDir', Path)
-//
-//BuildGradleDir = NewType('BuildGradleDir', Path)
-//"""directory containing build.gradle or build.gradle.kts file"""
-//
-//BuildGradleFile = NewType('BuildGradleFile', Path)
-//"""build.gradle or build.gradle.kts file"""
-//
-//GradlewFile = NewType('GradlewFile', Path)
