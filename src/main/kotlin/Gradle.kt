@@ -109,4 +109,3 @@ suspend fun ArtifactDir.dependencies(configuration: String): List<Dependency> {
             )
         }
 }
-

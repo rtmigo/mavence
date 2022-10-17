@@ -1,7 +1,13 @@
-fun main(args: Array<String>) {
-    println("Hello World!")
+import kotlinx.cli.*
 
-    // Try adding program arguments via Run/Debug configuration.
-    // Learn more about running applications: https://www.jetbrains.com/help/idea/running-applications.html.
-    println("Program arguments: ${args.joinToString()}")
+private enum class Command {
+    prepare, send
+}
+
+fun main(args: Array<String>) {
+    val parser = ArgParser("rtmaven.jar")
+    val command by parser.argument(
+        ArgType.Choice(Command.values().toList(), { Command.valueOf(it) })
+    )
+    parser.parse(args)
 }

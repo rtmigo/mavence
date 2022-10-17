@@ -18,6 +18,7 @@ dependencies {
     implementation("com.github.pgreze:kotlin-process:1.4")
     implementation("com.github.aballano:mnemonik:2.1.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.5")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
     testImplementation("io.kotest:kotest-assertions-core:5.5.0")
@@ -34,4 +35,32 @@ tasks.withType<KotlinCompile> {
 
 application {
     mainClass.set("MainKt")
+}
+
+//application {
+//    mainClass.set("rtmaven.MainKt")
+//}
+
+tasks.withType<Jar> {
+    from(sourceSets.main.get().output)
+    dependsOn(configurations.runtimeClasspath)
+    manifest {
+        attributes["Main-Class"] = application.mainClass
+    }
+}
+
+tasks.register<Jar>("uberJar") {
+    // Вместо задания отдельных свойств
+    // this.archive*, генерирующих имя, зависящее
+    // от версии и группы я предпочитаю сделать его предельно предсказуемым: build/libs/app.jar
+    archiveFileName.set("fullapp.jar")
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    from(sourceSets.main.get().output)
+    exclude("META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.DSA")
+    dependsOn(configurations.runtimeClasspath)
+    from({
+             configurations.runtimeClasspath.get()
+                 .filter { it.name.endsWith("jar") }
+                 .map { zipTree(it) }
+         })
 }
