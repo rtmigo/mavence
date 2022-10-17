@@ -27,6 +27,16 @@ fun Path.toGradlew(): GradlewFile {
 
 fun ArtifactDir.toRootDir(): ProjectRootDir = ProjectRootDir(path.toGradlew().path.parent)
 
+suspend fun ArtifactDir.gradleClean() {
+    val result = this.path.toGradlew().let {
+        process(
+            it.path.toString(),
+            "clean",
+            directory = this.path.toFile())
+    }
+    check(result.resultCode == 0)
+}
+
 suspend fun GradlewFile.version(): String {
     val res = process(
         this.path.toString(), "--version",
@@ -57,3 +67,26 @@ private suspend fun gradleProperties(d: ArtifactDir): Map<String, String> =
 private val cachedProperties = ::gradleProperties.memoizeSuspend()
 
 suspend fun ArtifactDir.gradleVersion() = cachedProperties(this)["version"]!!
+suspend fun ArtifactDir.group() = Group(cachedProperties(this)["group"]!!)
+suspend fun ArtifactDir.artifact() = Group(cachedProperties(this)["archivesBaseName"]!!)
+
+data class Dependency(val notation: Notation, val scope: String)
+
+suspend fun ArtifactDir.dependencies(configuration: String): List<Dependency> {
+    val lines = this.path.toGradlew().let {
+        process(
+            it.path.toString(),
+            "-q", "dependencies",
+            "--configuration", configuration,
+            stdout = Redirect.CAPTURE
+        ).also { res -> check(res.resultCode == 0) }.output
+    }
+    return lines.filter { it.startsWith("\\--- ") || it.startsWith("+--- ") }
+        .map {
+            Dependency(
+                Notation.parse(it.split(' ')[1]),
+                "runtime"// todo
+            )
+        }
+}
+
