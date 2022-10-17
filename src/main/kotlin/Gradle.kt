@@ -37,7 +37,7 @@ suspend fun ArtifactDir.gradleClean() {
     check(result.resultCode == 0)
 }
 
-suspend fun GradlewFile.version(): String {
+suspend fun GradlewFile.getVersion(): String {
     val res = process(
         this.path.toString(), "--version",
         stdout = Redirect.CAPTURE)
@@ -50,9 +50,29 @@ suspend fun GradlewFile.version(): String {
         }
 }
 
+suspend fun GradlewFile.setVersion(newVersion: String) {
+    val oldVersion = this.getVersion()
+    if (oldVersion == newVersion) {
+        println("Current version is $oldVersion. No need to change.")
+        return
+    }
+
+    process(
+        this.path.toString(),
+        "-q", "properties",
+        directory = this.path.parent.toFile())
+        .also { check(it.resultCode == 0) }
+
+    check(this.getVersion() == newVersion) { "Failed to change version" }
+}
+
 private suspend fun gradleProperties(d: ArtifactDir): Map<String, String> =
     d.path.toGradlew().let {
-        process(it.path.toString(), "-q", "properties", stdout = Redirect.CAPTURE)
+        process(
+            it.path.toString(),
+            "-q", "properties",
+            directory = it.path.parent.toFile(),
+            stdout = Redirect.CAPTURE)
     }.let {
         check(it.resultCode == 0)
         it.output
