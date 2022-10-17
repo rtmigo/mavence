@@ -27,7 +27,11 @@ value class Version(val string: String) {
 value class JarFile(val path: Path)
 
 @JvmInline
-value class PomFile(val path: Path)
+value class PomFile(val path: Path) {
+    init {
+        require(path.name.endsWith(".pom"))
+    }
+}
 
 @JvmInline
 value class SignatureFile(val path: Path)

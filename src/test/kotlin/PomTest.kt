@@ -1,9 +1,10 @@
+import io.kotest.matchers.booleans.shouldBeTrue
 import org.junit.jupiter.api.Test
 
 class PomTest {
     @Test
     fun test() {
-        val xml = pom(
+        val xml = PomData(
             Notation.parse("dev.domain:artifactus:1.2.0"),
             description = "Something",
             GithubRepo("richend", "piedpiper"),
@@ -21,7 +22,8 @@ class PomTest {
                     Notation.parse("org.apache.commons:commons-collections4:4.4"),
                     "runtime")
             )
-        )
-        println(xml)
+        ).toXml()
+        xml.contains("artifactus").shouldBeTrue()
+        //#println(xml)
     }
 }
