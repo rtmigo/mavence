@@ -90,7 +90,13 @@ data class Notation(
 }
 
 
-data class GithubRepo(val owner: String, val repo: String, val branch: String)
+data class GithubRepo(val owner: String, val repo: String) {
+    fun mainPage(): URL = URL("https://github.com/$owner/$repo")
+    fun license(): URL = URL("https://github.com/$owner/$repo/blob/HEAD/LICENSE")
+    fun scm(): String = "scm:git://github.com/$owner/$repo.git"
+}
+
+
 
 data class Developer(val name: String, val email: String?) {
     val nameAndEmail get() = name + (if (email != null) " <$email>" else "")

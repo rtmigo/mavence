@@ -14,8 +14,7 @@ repositories {
 }
 
 dependencies {
-    //testImplementation(kotlin("test"))
-
+    implementation("org.redundent:kotlin-xml-builder:1.8.0")
     implementation("com.github.pgreze:kotlin-process:1.4")
     implementation("com.github.aballano:mnemonik:2.1.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
