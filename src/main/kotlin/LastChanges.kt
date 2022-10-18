@@ -69,10 +69,11 @@ data class SignedMavenArtifactFiles(val files: List<Path>) {
 }
 
 suspend fun UnsignedMavenArtifactFiles.sign(): SignedMavenArtifactFiles {
-    Gpg().importKeyToSystem(mavenGpgKey())
+    TempGpg().importKey(mavenGpgKey())
     return SignedMavenArtifactFiles(
         this.files.map {
-            Gpg().signFile(it, passphrase = mavenGpgPassword())
+            throw NotImplementedError()
+            //TempGpg().signFile(it, passphrase = mavenGpgPassword())
         })
 }
 
