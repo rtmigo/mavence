@@ -8,7 +8,22 @@ import tools.*
 
 import java.nio.file.*
 
-class Database : NoOpCliktCommand(
+val m2str = Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
+
+fun eprintHeader(text: String) {
+    val line = List(80) { '%' }.joinToString("")
+    System.err.println()
+    System.err.println(line)
+    System.err.println("  $text")
+    System.err.println(line)
+    System.err.println()
+}
+
+fun eprint(s: String) = System.err.println(s)
+fun eprint() = System.err.println("")
+
+
+class Cli : NoOpCliktCommand(
     name = "rtmaven",
     help = "Maven Central publishing helper."
 ) {
@@ -23,19 +38,6 @@ class Database : NoOpCliktCommand(
     override fun run() = Unit
 }
 
-val m2str = Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
-
-fun printHeader(text: String) {
-    val line = List(80) { '%' }.joinToString("")
-    System.err.println()
-    System.err.println(line)
-    System.err.println("  $text")
-    System.err.println(line)
-    System.err.println()
-}
-
-fun printerr(s: String) = System.err.println(s)
-fun printerr() = System.err.println("")
 
 class Local : CliktCommand(help = "Build, publish to $m2str") {
     override fun run() = runBlocking {
@@ -54,15 +56,14 @@ open class Signed(help: String = "Build, sign, publish to $m2str") :
             key = GpgPrivateKey(gpgKey),
             pass = GpgPassphrase(gpgPwd)
         ).close()
-        Unit
     }
 }
 
 open class Stage(help: String = "Build, sign, publish to OSSRH Staging") : Signed(help = help) {
-    private val sonatypeUser by option(
+    protected val sonatypeUser by option(
         "--sonatype-username",
         envvar = "SONATYPE_USERNAME").required()
-    private val sonatypePassword by option(
+    protected val sonatypePassword by option(
         "--sonatype-password",
         envvar = "SONATYPE_PASSWORD").required()
 
@@ -72,7 +73,7 @@ open class Stage(help: String = "Build, sign, publish to OSSRH Staging") : Signe
             key = GpgPrivateKey(gpgKey),
             pass = GpgPassphrase(gpgPwd)
         ).use { signed ->
-            cmdUpload(
+            cmdToStaging(
                 signed,
                 user = SonatypeUsername(sonatypeUser),
                 pass = SonatypePassword(sonatypePassword))
@@ -81,18 +82,25 @@ open class Stage(help: String = "Build, sign, publish to OSSRH Staging") : Signe
     }
 }
 
-class Central : CliktCommand(help = "Build, sign, publish to OSSRH Staging, release to Central") {
-    override fun run() {
-        echo("Send to OSSRH and release to Central")
+class Central : Stage(help = "Build, sign, publish to OSSRH Staging, release to Central") {
+    override fun run() = runBlocking {
+        cmdSign(
+            cmdLocal(),
+            key = GpgPrivateKey(gpgKey),
+            pass = GpgPassphrase(gpgPwd)
+        ).use { signed ->
+            cmdToStaging(
+                signed,
+                user = SonatypeUsername(sonatypeUser),
+                pass = SonatypePassword(sonatypePassword)).let { (client, uri) ->
+                client.promoteToCentral(uri)
+            }
+        }
     }
 }
 
-suspend fun prepare(dir: Path = Paths.get(".")) {
-    dir.toGradlew().publishAndDetect("central")
-}
-
-suspend fun main(args: Array<String>) {
-    Database()
+fun main(args: Array<String>) {
+    Cli()
         .subcommands(Local(), Signed(), Stage(), Central())
         .main(args)
 }

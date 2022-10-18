@@ -1,6 +1,8 @@
 package stages.upload
 
-import printHeader
+import io.ktor.client.*
+import eprintHeader
+import eprint
 import stages.sign.*
 import tools.*
 import java.io.Closeable
@@ -32,19 +34,28 @@ class SignedBundle(val jar: Path, private val tempDir: BubbleDir) : Closeable {
     }
 }
 
-suspend fun cmdUpload(
+suspend fun cmdToStaging(
     mad: MavenArtifactWithTempSignatures,
     user: SonatypeUsername,
-    pass: SonatypePassword
-): Unit {
-    printHeader("Creating bundle.jar")
-    SignedBundle.fromFiles(mad).use {bundle->
-        printHeader("Sending")
-        authenticate(user, pass).use {
-            it.sendToStaging(bundle.jar)
+    pass: SonatypePassword,
+): Pair<HttpClient, StagingUri> {
+    eprintHeader("Creating bundle.jar")
+    return SignedBundle.fromFiles(mad).use { bundle ->
+        createClient(user, pass).use {
+            it to it.sendToStaging(bundle.jar)
         }
     }
-
 }
 
-// val client = HttpClient(CIO)
+suspend fun cmdToRelease(
+    uri: StagingUri,
+    user: SonatypeUsername,
+    pass: SonatypePassword,
+) {
+    createClient(user, pass).use {
+        it.promoteToCentral(uri)
+        eprint("HOORAY! We have released the package in Maven Central!")
+        eprint("The release may take some time.")
+    }
+}
+

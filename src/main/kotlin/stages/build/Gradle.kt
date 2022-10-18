@@ -9,10 +9,8 @@ import MmdlxFile
 import Notation
 import ProjectRootDir
 import com.aballano.mnemonik.memoizeSuspend
-import com.github.pgreze.process.Redirect
-import com.github.pgreze.process.process
+import com.github.pgreze.process.*
 import readUpdateTimes
-import runClean
 import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.exists
@@ -103,11 +101,11 @@ suspend fun GradlewFile.publishAndDetect(publicationName: String?): MmdlxFile {
 // publishToMavenLocal
 suspend fun GradlewFile.publishLocal(publicationName: String?) {
     println("Publish local")
-    runClean(
+    process(
         this.path.toString(), this.publishTaskName(publicationName),
-        directory = this.path.parent.toFile())
-        //stderr = Redirect.Consume { it.collect { System.out.print(it) } },
-        //stdout = Redirect.Consume { it.collect { System.err.println(it) } }
+        directory = this.path.parent.toFile()).unwrap()
+    //stderr = Redirect.Consume { it.collect { System.out.print(it) } },
+    //stdout = Redirect.Consume { it.collect { System.err.println(it) } }
 //    ).also {
 //        check(it.resultCode == 0)
 //    }
@@ -115,10 +113,10 @@ suspend fun GradlewFile.publishLocal(publicationName: String?) {
 
 internal suspend fun GradlewFile.publishTaskName(publicationName: String?): String {
     val taskToFindLC = (
-            if (publicationName == null)
-                "publishToMavenLocal"
-            else
-                "publish${publicationName}PublicationToMavenLocal")
+        if (publicationName == null)
+            "publishToMavenLocal"
+        else
+            "publish${publicationName}PublicationToMavenLocal")
         .lowercase()
 
     val tasks = this.tasks()

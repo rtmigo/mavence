@@ -3,8 +3,8 @@ package stages.sign
 import MavenArtifactDir
 
 import UnsMavenArtifactFiles
-import printHeader
-import printerr
+import eprintHeader
+import eprint
 import reanUnsigned
 import tools.*
 import java.io.Closeable
@@ -36,12 +36,12 @@ class MavenArtifactWithTempSignatures private constructor(
                     gpg.importKey(key)
                     unsigned.files.forEach {
                         val target = tempDir.path.resolve(it.name + ".asc")
-                        printerr()
-                        printerr("src $it\nsig $target")
+                        eprint()
+                        eprint("src $it\nsig $target")
                         gpg.signFile(it, pass, target)
                     }
                 }
-                printerr()
+                eprint()
                 assert(tempDir.path.listDirectoryEntries().size == unsigned.files.size)
                 return@init MavenArtifactWithTempSignatures(unsigned, tempDir)
             }
@@ -52,6 +52,6 @@ suspend fun UnsMavenArtifactFiles.toSigned(key: GpgPrivateKey, pass: GpgPassphra
     MavenArtifactWithTempSignatures.sign(this, key, pass)
 
 suspend fun cmdSign(mad: MavenArtifactDir, key: GpgPrivateKey, pass: GpgPassphrase): MavenArtifactWithTempSignatures {
-    printHeader("Signing files in ${mad.path}")
+    eprintHeader("Signing files in ${mad.path}")
     return mad.reanUnsigned().toSigned(key, pass)
 }
