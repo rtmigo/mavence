@@ -64,6 +64,7 @@ suspend fun Gpg.signFile(file: Path, passphrase: GpgPassphrase): Path {
     // Но в CI он точно один
 
     requireGpgTtyIfNeeded()
+
     val ascFile = file.parent.resolve(file.name + ".asc")
     check(!ascFile.exists())
     process(

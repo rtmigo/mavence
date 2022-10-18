@@ -2,6 +2,7 @@ import org.redundent.kotlin.xml.*
 import java.nio.file.Path
 import kotlin.io.path.writeText
 
+@Deprecated("Seems obsolete", ReplaceWith(""))
 data class PomData(
     val notation: Notation,
     val description: String,
@@ -11,6 +12,7 @@ data class PomData(
     val dependencies: List<Dependency>,
 )
 
+@Deprecated("Seems obsolete", ReplaceWith(""))
 fun PomData.toXml(): String =
     xml("project") {
         "modelVersion" { -"4.0.0" }
@@ -59,6 +61,7 @@ fun PomData.toXml(): String =
                 |"http://maven.apache.org/POM/4.0.0
                 | https://maven.apache.org/xsd/maven-4.0.0.xsd">""".trimMargin())
 
+@Deprecated("Seems obsolete", ReplaceWith(""))
 fun PomData.writeToDir(target: Path): PomFile {
     val p = target.resolve("${this.notation.artifact}-${this.notation.version}.pom")
     p.writeText(this.toString())

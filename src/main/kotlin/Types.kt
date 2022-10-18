@@ -2,6 +2,7 @@ import java.net.URL
 import java.nio.file.Path
 import kotlin.io.path.*
 
+@Deprecated("Seems obsolete", ReplaceWith(""))
 private fun looksLikeMavenAllowed(s: String): Boolean =
     Regex("""[A-Za-z][A-Za-z0-9_\-.]*""").matchEntire(s)!=null
 
@@ -77,6 +78,7 @@ value class GradlewFile(val path: Path) {
 open class ExpectedException(msg: String) : Exception(msg)
 class FailedToParseValueException(value: String) : ExpectedException("Failed to parse '${value}'")
 
+@Deprecated("Seems obsolete", ReplaceWith(""))
 data class Notation(
     val group: Group,
     val artifact: Artifact,
@@ -96,14 +98,14 @@ data class Notation(
     }
 }
 
-
+@Deprecated("Seems obsolete", ReplaceWith(""))
 data class GithubRepo(val owner: String, val repo: String) {
     fun mainPage(): URL = URL("https://github.com/$owner/$repo")
     fun license(): URL = URL("https://github.com/$owner/$repo/blob/HEAD/LICENSE")
     fun scm(): String = "scm:git://github.com/$owner/$repo.git"
 }
 
-
+@Deprecated("Seems obsolete", ReplaceWith(""))
 data class Developer(val name: String, val email: String?) {
     val nameAndEmail get() = name + (if (email != null) " <$email>" else "")
 
@@ -120,6 +122,7 @@ data class Developer(val name: String, val email: String?) {
 
 }
 
+@Deprecated("Seems obsolete", ReplaceWith(""))
 data class ProjectMeta(
     val description: String,
     val license_name: String,
@@ -129,6 +132,7 @@ data class ProjectMeta(
     val homepage: URL?,
 )
 
+@Deprecated("Seems obsolete", ReplaceWith(""))
 interface Package {
     val mavenUrl: MavenUrl
     val notation: Notation
@@ -136,6 +140,7 @@ interface Package {
     val bundle: JarFile?
 }
 
+@Deprecated("Seems obsolete", ReplaceWith(""))
 class PackageImpl(
     override val mavenUrl: MavenUrl,
     override val notation: Notation,
