@@ -4,7 +4,9 @@ import java.text.SimpleDateFormat
 
 plugins {
     kotlin("jvm") version "1.7.20"
+    kotlin("plugin.serialization") version "1.7.20"
     application
+
 }
 
 group = "io.github.rtmigo"
@@ -25,6 +27,19 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
     testImplementation("io.kotest:kotest-assertions-core:5.5.0")
+    implementation("io.github.aakira:napier:2.6.1")
+    implementation("org.jsoup:jsoup:1.14.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+}
+
+
+
+dependencies {
+    val ktor = "2.1.2"
+    implementation("io.ktor:ktor-client-core:$ktor")
+    implementation("io.ktor:ktor-client-cio:$ktor")
+    implementation("io.ktor:ktor-client-auth:$ktor")
+    implementation("io.ktor:ktor-client-logging:$ktor")
 }
 
 tasks.test {

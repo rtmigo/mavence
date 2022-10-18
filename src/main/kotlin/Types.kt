@@ -43,38 +43,6 @@ value class SignatureFile(val path: Path)
 @JvmInline
 value class MavenUrl(val url: URL)
 
-@JvmInline
-value class ProjectRootDir(val path: Path) {
-    init {
-        assert(path.resolve("gradlew").exists())
-    }
-}
-
-@JvmInline
-value class ArtifactDir(val path: Path) {
-    init {
-        require(
-            path.resolve("build.gradle.kts").exists() ||
-                path.resolve("build.gradle").exists()) {
-            "build.gradle not found in $path"
-        }
-    }
-}
-
-@JvmInline
-value class BuildGradleFile(val path: Path) {
-    init {
-        require(path.name.startsWith("build.gradle"))
-    }
-}
-
-@JvmInline
-value class GradlewFile(val path: Path) {
-    init {
-        require(path.name == "gradlew" || path.name == "gradlew.bat")
-    }
-}
-
 open class ExpectedException(msg: String) : Exception(msg)
 class FailedToParseValueException(value: String) : ExpectedException("Failed to parse '${value}'")
 

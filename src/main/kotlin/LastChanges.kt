@@ -1,3 +1,7 @@
+
+import org.jsoup.Jsoup
+import stages.sign.isSignature
+import tools.*
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.*
@@ -12,7 +16,16 @@ private fun listMavenMetadataLocals(): Sequence<MmdlxFile> {
 
 /// maven-metadata-local.xml
 @JvmInline
-value class MmdlxFile(val file: File)
+value class MmdlxFile(val file: File) {
+    init {
+        require(file.name=="maven-metadata-local.xml")
+    }
+
+    fun latest() = Version(
+        Jsoup.parse(file.readText())
+            .select("metadata > versioning > latest").single().text())
+
+}
 
 @JvmInline
 value class MavenArtifactDir(val path: Path)
@@ -35,8 +48,7 @@ fun MmdlxFile.toMavenArtifactFiles(): OldUnsignedMavenArtifactFiles =
                                       .single { it.isDirectory() }.listDirectoryEntries())
 
 fun MmdlxFile.toMavenArtifactDir() =
-    MavenArtifactDir(this.file.toPath().parent.listDirectoryEntries()
-                         .single { it.isDirectory() })
+    MavenArtifactDir(this.file.toPath().parent.resolve(this.latest().string))
 
 fun MavenArtifactDir.reanUnsigned() = UnsMavenArtifactFiles(
     this.path.listDirectoryEntries().filter { !it.isSignature }

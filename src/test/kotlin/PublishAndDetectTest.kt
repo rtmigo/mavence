@@ -2,6 +2,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import stages.build.*
 import java.nio.file.Paths
 
 class PublishAndDetectTest {

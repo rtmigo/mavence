@@ -2,6 +2,7 @@ import io.kotest.matchers.*
 import io.kotest.matchers.booleans.shouldBeTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import stages.build.*
 import java.nio.file.*
 
 class GradleTest {

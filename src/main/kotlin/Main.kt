@@ -1,6 +1,11 @@
 import com.github.ajalt.clikt.core.*
 import com.github.ajalt.clikt.parameters.options.*
 import kotlinx.coroutines.runBlocking
+import stages.build.*
+import stages.sign.cmdSign
+import stages.upload.*
+import tools.*
+
 import java.nio.file.*
 
 class Database : NoOpCliktCommand(
@@ -18,7 +23,7 @@ class Database : NoOpCliktCommand(
     override fun run() = Unit
 }
 
-private val m2str = Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
+val m2str = Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
 
 fun printHeader(text: String) {
     val line = List(80) { '%' }.joinToString("")
@@ -32,32 +37,6 @@ fun printHeader(text: String) {
 fun printerr(s: String) = System.err.println(s)
 fun printerr() = System.err.println("")
 
-suspend fun cmdLocal(): MavenArtifactDir {
-    printHeader("Publishing to $m2str")
-    val f = Paths.get(".")
-        .toGradlew().publishAndDetect(null)
-    printerr()
-
-    val mad = f.toMavenArtifactDir()
-    printerr("Artifact dir: ${mad.path}")
-    printerr("Notation:     ${mad.reanUnsigned().notation}")
-    return mad
-}
-
-suspend fun cmdSign(mad: MavenArtifactDir, key: GpgPrivateKey, pass: GpgPassphrase) {
-    printHeader("Signing files in ${mad.path}")
-    val unsignedFiles = mad.reanUnsigned().toSigned(key, pass)
-
-    //check(!unsignedFiles.areSigned) { "Already signed" }
-
-//    TempGpg().use { gpg->
-//        gpg.importKey(key)
-//        unsignedFiles.files.forEach { gpg.signFile(it, pass) }
-//    }
-
-
-}
-
 class Local : CliktCommand(help = "Build, publish to $m2str") {
     override fun run() = runBlocking {
         cmdLocal()
@@ -67,14 +46,15 @@ class Local : CliktCommand(help = "Build, publish to $m2str") {
 
 open class Signed(help: String = "Build, sign, publish to $m2str") :
     CliktCommand(help = help) {
-    private val gpgKey by option("--gpg-key", envvar = "MAVEN_GPG_KEY").required()
-    private val gpgPwd by option("--gpg-password", envvar = "MAVEN_GPG_PASSWORD").required()
+    val gpgKey by option("--gpg-key", envvar = "MAVEN_GPG_KEY").required()
+    val gpgPwd by option("--gpg-password", envvar = "MAVEN_GPG_PASSWORD").required()
     override fun run() = runBlocking {
         cmdSign(
             cmdLocal(),
-            key=GpgPrivateKey(gpgKey),
-            pass =GpgPassphrase(gpgPwd)
-        )
+            key = GpgPrivateKey(gpgKey),
+            pass = GpgPassphrase(gpgPwd)
+        ).close()
+        Unit
     }
 }
 
@@ -86,8 +66,18 @@ open class Stage(help: String = "Build, sign, publish to OSSRH Staging") : Signe
         "--sonatype-password",
         envvar = "SONATYPE_PASSWORD").required()
 
-    override fun run() {
-        echo("Initialized the database.")
+    override fun run() = runBlocking {
+        cmdSign(
+            cmdLocal(),
+            key = GpgPrivateKey(gpgKey),
+            pass = GpgPassphrase(gpgPwd)
+        ).use { signed ->
+            cmdUpload(
+                signed,
+                user = SonatypeUsername(sonatypeUser),
+                pass = SonatypePassword(sonatypePassword))
+        }
+        Unit
     }
 }
 

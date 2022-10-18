@@ -1,3 +1,5 @@
+package tools
+
 import com.github.pgreze.process.*
 import java.nio.file.*
 import kotlin.io.path.*
@@ -38,13 +40,13 @@ object Jar {
 suspend fun Jar.addByBasenames(files: List<Path>, target: Path) {
     require(target.name.endsWith(".jar"))
     check(!target.exists())
-    val fileArgs = files.map { listOf("-C", it.parent.toString(), it.name) }.flatten()
-    val allArgs = listOf(this.exe(), "cvf") + fileArgs
+    check(files.size==files.map { it.name }.distinct().size)
+    assert(files.all { it.exists() })
 
-    process(*allArgs.toTypedArray())
-        .also {
-            check(it.resultCode == 0)
-        }
+    val fileArgs = files.map { listOf("-C", it.parent.toString(), it.name) }.flatten()
+
+    val allArgs = listOf(this.exe(), "cvf", target.toString()) + fileArgs
+    process(command=allArgs.toTypedArray()).unwrap()
     check(target.exists())
 }
 

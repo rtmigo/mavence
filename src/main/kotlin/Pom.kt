@@ -1,4 +1,5 @@
 import org.redundent.kotlin.xml.*
+import stages.build.Dependency
 import java.nio.file.Path
 import kotlin.io.path.writeText
 

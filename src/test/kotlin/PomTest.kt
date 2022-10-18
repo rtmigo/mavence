@@ -1,5 +1,6 @@
 import io.kotest.matchers.booleans.shouldBeTrue
 import org.junit.jupiter.api.Test
+import stages.build.Dependency
 
 class PomTest {
     @Test

@@ -22,19 +22,22 @@ publishing {
             pom {
                 developers {
                     developer {
-                        name.set("Slartibartfast")
-                        email.set("slartibartfast@magrathea.net")
+                        name.set("Artsiom iG")
+                        email.set("ortemeo@gmail.com")
+                        //name.set("Slartibartfast")
+                        //email.set("slartibartfast@magrathea.net")
                     }
                 }
                 val repo = "precise_kt"
+                //val user "rtmigo"
                 scm {
-                    connection.set("scm:git:git://github.com/slarti/$repo.git")
-                    url.set("https://github.com/slarti/$repo")
+                    connection.set("scm:git:git://github.com/rtmigo/$repo.git")
+                    url.set("https://github.com/rtmigo/$repo")
                 }
                 licenses {
                     license {
                         name.set("MIT")
-                        url.set("https://github.com/slarti/$repo/blob/HEAD/LICENSE")
+                        url.set("https://github.com/rtmigo/$repo/blob/HEAD/LICENSE")
                     }
                 }
             }
@@ -42,8 +45,8 @@ publishing {
     }
 }
 
-group = "io.magrathea.sla"
-version = "1.2.3-rc1"
+group = "io.github.rtmigo"
+version = "1.2.3-rc2"
 
 repositories {
     // Use Maven Central for resolving dependencies.
