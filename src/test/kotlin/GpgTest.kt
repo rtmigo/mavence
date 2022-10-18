@@ -1,5 +1,4 @@
 import io.kotest.matchers.booleans.*
-import io.kotest.matchers.paths.shouldExist
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import java.nio.file.Path
@@ -113,11 +112,11 @@ class GpgTest {
             val tempDir = createTempDirectory("temp")
             try {
                 val fileToSign = tempDir.resolve("file.txt")
-                val signature = fileToSign.parent/"signature.asc"
+                val expectedSignature = tempDir.resolve("file.txt.asc")
                 fileToSign.writeText("Hello, GPG")
                 println("Signing...")
-                it.signFile(fileToSign, GpgPassphrase("password123"), signature)
-                signature.readText().trim()
+                it.signFile(fileToSign, GpgPassphrase("password123"))
+                expectedSignature.readText().trim()
                     .startsWith("-----BEGIN PGP SIGNATURE-----")
                     .shouldBeTrue()
                 println("Signed")

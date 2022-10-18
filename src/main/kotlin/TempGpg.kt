@@ -70,7 +70,9 @@ class TempGpg : Closeable {
     }
 
     /// Creates `file.ext.asc` next to `file.ext`.
-    suspend fun signFile(file: Path, passphrase: GpgPassphrase, target: Path) {
+    suspend fun signFile(file: Path,
+                         passphrase: GpgPassphrase,
+                         target: Path = file.parent.resolve(file.name+".asc")) {
         // 2022-10 я не выяснил, какой именно ключ будет использоваться для подписи.
         // Но в CI он точно один
 
