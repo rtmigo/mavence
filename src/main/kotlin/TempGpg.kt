@@ -4,6 +4,8 @@ import java.nio.file.Path
 import java.nio.file.attribute.PosixFilePermissions
 import kotlin.io.path.*
 
+@RequiresOptIn
+annotation class GpgInternals
 
 @JvmInline
 value class GpgPassphrase(val string: String)
@@ -11,13 +13,27 @@ value class GpgPassphrase(val string: String)
 @JvmInline
 value class GpgPrivateKey(val string: String)
 
+@OptIn(GpgInternals::class)
+suspend fun signFile(file: Path,
+                     key: GpgPrivateKey,
+                     phrase: GpgPassphrase,
+                     target: Path = file.parent.resolve(file.name+".asc")) {
+    TempGpg().use {
+        it.importKey(key)
+        it.signFile(file, phrase, target)
+    }
+}
+
 /// Runs GPG with a temporary "homedir", i.e. with a temporary keys database.
 /// We can import keys into it without changing the system
-class TempGpg : Closeable {
+@GpgInternals
+internal class TempGpg : Closeable {
     val exe: String = "gpg"
 
     val tempHome: Path = createTempHome()
     val envWithHome = mapOf("GNUPGHOME" to this.tempHome.toString())
+
+    private var wasKeyImported = false
 
     override fun close() {
         require(tempHome.toString().contains("tmp"))
@@ -50,23 +66,16 @@ class TempGpg : Closeable {
     }
 
     suspend fun importKey(privateKey: GpgPrivateKey) {
-        println("A")
+        check(!this.wasKeyImported) { "key already was imported" }
+        this.wasKeyImported = true
         require(this.getHome() == tempHome) {
             "GPG does not seem the respect GNUPGHOME"
         }
-        println("B")
         process(
             this.exe,  "--batch", "--import",
             stdin = InputSource.fromString(privateKey.string),
-//            InputSource.FromStream { out: OutputStream ->
-//                out.write("hello world\n".toByteArray())
-//                out.flush()
-//            },
-
-            //InputSource.fromString("EOF"),
             env = this.envWithHome,
-        ).also { println(it) }
-            .unwrap()
+        ).unwrap()
     }
 
     /// Creates `file.ext.asc` next to `file.ext`.
@@ -74,11 +83,8 @@ class TempGpg : Closeable {
                          passphrase: GpgPassphrase,
                          target: Path = file.parent.resolve(file.name+".asc")) {
         // 2022-10 я не выяснил, какой именно ключ будет использоваться для подписи.
-        // Но в CI он точно один
-
-        //requireGpgTtyIfNeeded()
-
-        //val target = file.parent.resolve(file.name + ".asc")
+        // Но если мы импортировали всего один, то он и будет
+        check(this.wasKeyImported) { "key was not imported" }
         check(!target.exists())
         process(
             this.exe, "--armor", "--detach-sign",
@@ -133,7 +139,7 @@ suspend fun requireGpgTtyIfNeeded() {
     // Поэтому пока я просто требую, чтобы такая переменная среды была задана
     // до запуска скрипта.
     //
-    // !!! впрочем, возможно спасёт аргумент --mo-tty
+    // !!! впрочем, возможно спасёт аргумент --no-tty
 
     if (!canGetTty() && !weAreInWindows() && !canGetTty())
         throw Exception(

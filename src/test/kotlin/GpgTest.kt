@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test
 import java.nio.file.Path
 import kotlin.io.path.*
 
+@OptIn(GpgInternals::class)
 class GpgTest {
     @Test
     fun tempDir() = runBlocking {
@@ -106,26 +107,45 @@ class GpgTest {
             -----END PGP PRIVATE KEY BLOCK-----            
         """.trimIndent()
 
-        TempGpg().use {
-            it.importKey(GpgPrivateKey(testerPrivateKey))
-
             val tempDir = createTempDirectory("temp")
             try {
                 val fileToSign = tempDir.resolve("file.txt")
                 val expectedSignature = tempDir.resolve("file.txt.asc")
-                fileToSign.writeText("Hello, GPG")
-                println("Signing...")
-                it.signFile(fileToSign, GpgPassphrase("password123"))
+                signFile(fileToSign,
+                         GpgPrivateKey(testerPrivateKey),
+                         GpgPassphrase("password123"))
+//                fileToSign.writeText("Hello, GPG")
+//                println("Signing...")
+//                it.signFile(fileToSign, GpgPassphrase("password123"))
                 expectedSignature.readText().trim()
                     .startsWith("-----BEGIN PGP SIGNATURE-----")
                     .shouldBeTrue()
-                println("Signed")
+//                println("Signed")
             } finally {
                 require(tempDir.toString().contains("temp"))
                 tempDir.toFile().deleteRecursively()
             }
 
-        }
 
+
+//        TempGpg().use {
+//            it.importKey(GpgPrivateKey(testerPrivateKey))
+//
+//            val tempDir = createTempDirectory("temp")
+//            try {
+//                val fileToSign = tempDir.resolve("file.txt")
+//                val expectedSignature = tempDir.resolve("file.txt.asc")
+//                fileToSign.writeText("Hello, GPG")
+//                println("Signing...")
+//                it.signFile(fileToSign, GpgPassphrase("password123"))
+//                expectedSignature.readText().trim()
+//                    .startsWith("-----BEGIN PGP SIGNATURE-----")
+//                    .shouldBeTrue()
+//                println("Signed")
+//            } finally {
+//                require(tempDir.toString().contains("temp"))
+//                tempDir.toFile().deleteRecursively()
+//            }
+//        }
     }
 }
