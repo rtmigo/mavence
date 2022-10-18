@@ -1,6 +1,7 @@
 import com.aballano.mnemonik.memoizeSuspend
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
+import kotlinx.coroutines.flow.collect
 import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.exists
@@ -77,7 +78,7 @@ suspend fun GradlewFile.setVersion(newVersion: String) {
 internal fun <K, V> keysOfChanges(old: Map<K, V>, new: Map<K, V>): List<K> =
     (old.keys + new.keys).filter { (old[it] ?: 0) != (new[it] ?: 0) }
 
-suspend fun GradlewFile.publishAndDetect(publicationName: String): MmdlxFile {
+suspend fun GradlewFile.publishAndDetect(publicationName: String?): MmdlxFile {
     val old = readUpdateTimes()
     this.publishLocal(publicationName)
     val new = readUpdateTimes()
@@ -89,14 +90,16 @@ suspend fun GradlewFile.publishAndDetect(publicationName: String): MmdlxFile {
 
 // publishCentralPublicationToMavenLocal
 // publishToMavenLocal
-suspend fun GradlewFile.publishLocal(publicationName: String) {
-    process(
+suspend fun GradlewFile.publishLocal(publicationName: String?) {
+    println("Publish local")
+    runClean(
         this.path.toString(), this.publishTaskName(publicationName),
-        directory = this.path.parent.toFile(),
-        stdout = Redirect.Consume { System.err.print(it) }
-    ).also {
-        check(it.resultCode == 0)
-    }
+        directory = this.path.parent.toFile())
+        //stderr = Redirect.Consume { it.collect { System.out.print(it) } },
+        //stdout = Redirect.Consume { it.collect { System.err.println(it) } }
+//    ).also {
+//        check(it.resultCode == 0)
+//    }
 }
 
 internal suspend fun GradlewFile.publishTaskName(publicationName: String?): String {

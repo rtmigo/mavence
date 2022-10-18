@@ -1,5 +1,6 @@
 import com.github.ajalt.clikt.core.*
 import com.github.ajalt.clikt.parameters.options.*
+import kotlinx.coroutines.runBlocking
 import java.nio.file.*
 
 class Database : NoOpCliktCommand(
@@ -19,9 +20,31 @@ class Database : NoOpCliktCommand(
 
 private val m2str = Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
 
+fun printHeader(text: String) {
+    val line = List(80) { '%' }.joinToString("")
+    System.err.println(line)
+    System.err.println("  $text")
+    System.err.println(line)
+    System.err.println()
+
+}
+
+fun printerr(s: String) = System.err.println(s)
+fun printerr() = System.err.println("")
+
+suspend fun cmdLocal() {
+    printHeader("Publishing to $m2str")
+    val f = Paths.get(".")
+        .toGradlew().publishAndDetect(null)
+    printerr()
+
+    printerr("Artifact dir: ${f.toMavenArtifactDir().path}")
+    printerr("Notation:     ${f.toMavenArtifactDir().read().notation.toString()}")
+}
+
 class Local : CliktCommand(help = "Build, publish to $m2str") {
-    override fun run() {
-        echo("Initialized the database.")
+    override fun run() = runBlocking {
+        cmdLocal()
     }
 }
 
@@ -61,10 +84,4 @@ suspend fun main(args: Array<String>) {
     Database()
         .subcommands(Local(), Signed(), Stage(), Central())
         .main(args)
-//    val parser = ArgParser("rtmaven.jar")
-//    val command by parser.argument(
-//        ArgType.Choice(Command.values().toList(), { Command.valueOf(it) })
-//    )
-    //parser.parse(args)
-
 }

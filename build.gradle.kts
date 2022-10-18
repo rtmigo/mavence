@@ -19,6 +19,7 @@ dependencies {
     implementation("org.redundent:kotlin-xml-builder:1.8.0")
     implementation("com.github.pgreze:kotlin-process:1.4")
     implementation("com.github.aballano:mnemonik:2.1.1")
+    //implementation("org.simpleframework:simple-xml:2.7.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("com.github.ajalt.clikt:clikt:3.5.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
@@ -82,6 +83,7 @@ tasks.register<Jar>("uberJar") {
          })
     doLast {
         println("JAR size %.2f MB".format(archiveFile.get().asFile.length() / 1_000_000.0))
-        println("Run with: java -jar ${archiveFile.get()}")
+        println("Run with: alias ${archiveBaseName.get()}='java -jar ${archiveFile.get()}'")
+        //#println("OR: java -jar ${archiveFile.get()}")
     }
 }

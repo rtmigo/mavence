@@ -78,7 +78,7 @@ value class GradlewFile(val path: Path) {
 open class ExpectedException(msg: String) : Exception(msg)
 class FailedToParseValueException(value: String) : ExpectedException("Failed to parse '${value}'")
 
-@Deprecated("Seems obsolete", ReplaceWith(""))
+
 data class Notation(
     val group: Group,
     val artifact: Artifact,
@@ -95,7 +95,15 @@ data class Notation(
                 throw FailedToParseValueException(text)
             }
         }
+
+//        fun fromPomPath(segments: List<String>): Notation {
+//            // /home/user/.m2/repository/io/magrathea/sla/libr/1.2.3-rc1/libr-1.2.3-rc1.pom
+//            require(segments.last().endsWith(".pom"))
+//            //return Notation(Group(segments[segments.size))
+//        }
     }
+
+    override fun toString(): String = "${group.string}:${artifact.string}:${version.string}"
 }
 
 @Deprecated("Seems obsolete", ReplaceWith(""))

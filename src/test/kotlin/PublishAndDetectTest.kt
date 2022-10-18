@@ -3,7 +3,6 @@ import io.kotest.matchers.ints.shouldBeGreaterThan
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import java.nio.file.Paths
-import kotlin.io.path.exists
 
 class PublishAndDetectTest {
     @Test
@@ -13,6 +12,6 @@ class PublishAndDetectTest {
         // тут мы уже знаем, что артефакт в ".m2" был обновлён, причём ровно один артефакт
         f.file.exists().shouldBeTrue()
         // конвертируя в ArtifactDir мы также убедимся, что в каталоге POM и JAR
-        f.toMavenArtifactDir().files.size.shouldBeGreaterThan(2)
+        f.toMavenArtifactFiles().files.size.shouldBeGreaterThan(2)
     }
 }

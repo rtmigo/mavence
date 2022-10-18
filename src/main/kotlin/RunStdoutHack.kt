@@ -26,15 +26,19 @@ suspend fun runClean(
     val procResult = process(
         command = command,
         stdin = stdin,
-        stdout = Redirect.Consume {
-            stdoutBuilder.append(it)
-            outputBuilder.append(it)
-            System.err.print(it)
+        stdout = Redirect.Consume { flow ->
+            flow.collect {
+                stdoutBuilder.append(it)
+                outputBuilder.append(it)
+                System.err.println(it)
+            }
         },
-        stderr = Redirect.Consume {
-            stderrBuilder.append(it)
-            outputBuilder.append(it)
-            System.err.print(it)
+        stderr = Redirect.Consume { flow ->
+            flow.collect {
+                stderrBuilder.append(it)
+                outputBuilder.append(it)
+                System.err.println(it)
+            }
         },
         charset = charset,
         env = env,

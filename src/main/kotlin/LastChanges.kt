@@ -14,6 +14,9 @@ private fun listMavenMetadataLocals(): Sequence<MmdlxFile> {
 @JvmInline
 value class MmdlxFile(val file: File)
 
+@JvmInline
+value class MavenArtifactDir(val path: Path)
+
 private fun readLastUpdated(mavenMetaDataLocal: MmdlxFile): Long =
     Regex("<lastUpdated>(\\d+)</lastUpdated>")
         .find(mavenMetaDataLocal.file.readText())!!.let {
@@ -27,19 +30,24 @@ fun readUpdateTimes(): Map<MmdlxFile, Long> =
 
 /// maven-metadata-local.xml обычно находится по соседству с единственным каталогом -
 /// тем, где сам артифакт
-fun MmdlxFile.toMavenArtifactDir(): UnsignedMavenArtifactFiles =
+fun MmdlxFile.toMavenArtifactFiles(): UnsignedMavenArtifactFiles =
     UnsignedMavenArtifactFiles(this.file.toPath().parent.listDirectoryEntries()
                                    .single { it.isDirectory() }.listDirectoryEntries())
 
-///// Каталог, в котором POM и JARы.
-//data class MavenArtifactDir(val path: Path) {
-//    val files = path.listDirectoryEntries()
-//
-//    init {
-//        check(files.filter { it.name.endsWith(".pom") }.size == 1)
-//        check(files.any { it.name.endsWith(".jar") })
-//    }
-//}
+fun MmdlxFile.toMavenArtifactDir() =
+    MavenArtifactDir(this.file.toPath().parent.listDirectoryEntries()
+                         .single { it.isDirectory() })
+
+fun MavenArtifactDir.read() = BetterMavenArtifactFiles(this.path.listDirectoryEntries())
+
+data class BetterMavenArtifactFiles(val files: List<Path>) {
+    init {
+        //println(files)
+    }
+    val pomFile = files.single { it.name.endsWith(".pom") }
+    val notation by lazy { PomXml(pomFile.readText()).notation() }
+}
+
 
 data class UnsignedMavenArtifactFiles(val files: List<Path>) {
     init {
