@@ -26,12 +26,12 @@ suspend fun signFile(file: Path,
 
 /// Runs GPG with a temporary "homedir", i.e. with a temporary keys database.
 /// We can import keys into it without changing the system
-@GpgInternals
+
 internal class TempGpg : Closeable {
-    val exe: String = "gpg"
+    private val exe: String = "gpg"
 
     val tempHome: Path = createTempHome()
-    val envWithHome = mapOf("GNUPGHOME" to this.tempHome.toString())
+    private val envWithHome = mapOf("GNUPGHOME" to this.tempHome.toString())
 
     private var wasKeyImported = false
 
@@ -96,7 +96,7 @@ internal class TempGpg : Closeable {
             "--passphrase-fd", "0",
             env = this.envWithHome,
             directory = file.parent.toFile(),
-            stdin = InputSource.fromString(passphrase.string)).unwrap().also { println(it) }
+            stdin = InputSource.fromString(passphrase.string)).unwrap()
         check(target.exists())
     }
 }
@@ -139,20 +139,11 @@ suspend fun requireGpgTtyIfNeeded() {
     // Поэтому пока я просто требую, чтобы такая переменная среды была задана
     // до запуска скрипта.
     //
-    // !!! впрочем, возможно спасёт аргумент --no-tty
+    // !!! впрочем, возможно задачу решит аргумент "--no-tty". Его использует Gradle
+    // https://bit.ly/3Sb4iml
 
     if (!canGetTty() && !weAreInWindows() && !canGetTty())
         throw Exception(
             """Please set GPG_TTY environment variable: 
                | `export GPG_TTY=${'$'}(tty)`""".trimIndent())
-    // https://github.com/gradle/gradle/blob/5ec3f672ed600a86280be490395d70b7bc634862/subprojects/security/src/main/java/org/gradle/security/internal/gnupg/GnupgSignatory.java
 }
-
-
-//     // GNUPGHOME=/tmp/gpgh
-//}
-
-
-//private fun whoami() = System.getProperty("user.name")
-
-

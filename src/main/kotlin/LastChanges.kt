@@ -30,26 +30,41 @@ fun readUpdateTimes(): Map<MmdlxFile, Long> =
 
 /// maven-metadata-local.xml обычно находится по соседству с единственным каталогом -
 /// тем, где сам артифакт
-fun MmdlxFile.toMavenArtifactFiles(): UnsignedMavenArtifactFiles =
-    UnsignedMavenArtifactFiles(this.file.toPath().parent.listDirectoryEntries()
-                                   .single { it.isDirectory() }.listDirectoryEntries())
+fun MmdlxFile.toMavenArtifactFiles(): OldUnsignedMavenArtifactFiles =
+    OldUnsignedMavenArtifactFiles(this.file.toPath().parent.listDirectoryEntries()
+                                      .single { it.isDirectory() }.listDirectoryEntries())
 
 fun MmdlxFile.toMavenArtifactDir() =
     MavenArtifactDir(this.file.toPath().parent.listDirectoryEntries()
                          .single { it.isDirectory() })
 
-fun MavenArtifactDir.read() = BetterMavenArtifactFiles(this.path.listDirectoryEntries())
+fun MavenArtifactDir.reanUnsigned() = UnsMavenArtifactFiles(
+    this.path.listDirectoryEntries().filter { !it.isSignature }
+)
 
-data class BetterMavenArtifactFiles(val files: List<Path>) {
-    init {
-        //println(files)
-    }
+open class UnsMavenArtifactFiles(val files: List<Path>) {
     val pomFile = files.single { it.name.endsWith(".pom") }
     val notation by lazy { PomXml(pomFile.readText()).notation() }
+
+    val areSigned: Boolean by lazy {
+        val signaturesCount = files.filter { it.isSignature }.size
+        if (signaturesCount == 0)
+            false
+        else {
+            check(signaturesCount * 2 == this.files.size) { "Unexpected signatures count" }
+            true
+        }
+    }
+}
+
+class SignedMavenArtifactFiles(files: List<Path>) : UnsMavenArtifactFiles(files) {
+    init {
+        require(this.areSigned)
+    }
 }
 
 
-data class UnsignedMavenArtifactFiles(val files: List<Path>) {
+data class OldUnsignedMavenArtifactFiles(val files: List<Path>) {
     init {
         check(files.filter { it.name.endsWith(".pom") }.size == 1)
         check(files.any { it.name.endsWith(".jar") })
@@ -57,7 +72,7 @@ data class UnsignedMavenArtifactFiles(val files: List<Path>) {
     }
 }
 
-data class SignedMavenArtifactFiles(val files: List<Path>) {
+data class OldSignedMavenArtifactFiles(val files: List<Path>) {
     init {
         check(files.filter { it.name.endsWith(".pom") }.size == 1)
         check(files.any { it.name.endsWith(".jar") })
@@ -68,10 +83,10 @@ data class SignedMavenArtifactFiles(val files: List<Path>) {
     }
 }
 
-suspend fun UnsignedMavenArtifactFiles.sign(): SignedMavenArtifactFiles {
+suspend fun OldUnsignedMavenArtifactFiles.sign(): OldSignedMavenArtifactFiles {
     throw NotImplementedError()
     //TempGpg().importKey(mavenGpgKey())
-    return SignedMavenArtifactFiles(
+    return OldSignedMavenArtifactFiles(
         this.files.map {
             throw NotImplementedError()
             //TempGpg().signFile(it, passphrase = mavenGpgPassword())
