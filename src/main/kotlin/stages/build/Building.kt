@@ -9,7 +9,7 @@ import kotlin.io.path.*
 suspend fun cmdLocal(ga: GroupArtifact, isFinal: Boolean = false): MavenArtifactDir {
     eprintHeader("Publishing to $m2str")
     val f = Paths.get(".")
-        .toGradlew().publishAndDetect(null)
+        .toGradlew().publishAndDetect(ga,null)
     eprint()
 
     val mad = f.toMavenArtifactDir()

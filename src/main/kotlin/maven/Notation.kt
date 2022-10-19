@@ -1,6 +1,7 @@
 package maven
 
 import FailedToParseValueException
+import ValueException
 import java.lang.IllegalArgumentException
 
 private fun looksLikeMavenAllowed(s: String): Boolean =
@@ -18,12 +19,16 @@ value class Group(val string: String) {
     init {
         require(looksLikeMavenAllowed(string)) { "Illegal group name: '$string'" }
     }
+
+    //fun splitSlash() = this.string.replace('.', '/')
+
+    fun segments() = this.string.split('.')
 }
 
 @JvmInline
 value class Version(val string: String) {
     init {
-        require(string.isNotEmpty() && string[0].isDigit())  { "Illegal version: '$string'" }
+        require(string.isNotEmpty() && string[0].isDigit()) { "Illegal version: '$string'" }
     }
 }
 
@@ -33,13 +38,16 @@ data class GroupArtifact(val group: Group, val artifact: Artifact) {
             try {
                 val parts = text.split(':')
                 require(parts.size == 2)
-                return GroupArtifact(Group(parts[1]), Artifact(parts[1]))
+                return GroupArtifact(Group(parts[0]), Artifact(parts[1]))
             } catch (e: Throwable) {
-                throw IllegalArgumentException("Failed to parse '$text'", e)
+                throw ValueException("group:artifact", text)
             }
         }
     }
 
+    fun segments() = this.group.segments() + listOf(this.artifact.string)
+
+    //fun splitSlash() = "${group.splitSlash()}/${artifact.string}"
     override fun toString(): String = "${group.string}:${artifact.string}"
 }
 
@@ -50,13 +58,11 @@ data class Notation(
 ) {
     companion object {
         fun parse(text: String): Notation {
-            val parts = text.split(':')
-            if (parts.size != 3)
-                throw FailedToParseValueException(text)
             try {
+                val parts = text.split(':')
                 return Notation(Group(parts[0]), Artifact(parts[1]), Version(parts[2]))
-            } catch (_: Exception) {
-                throw FailedToParseValueException(text)
+            } catch (e: Throwable) {
+                throw ValueException("group:artifact:version", text)
             }
         }
     }

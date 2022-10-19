@@ -5,14 +5,14 @@ import BuildGradleFile
 import ExpectedException
 import GradlewFile
 
-import MetadataLocalXmlFile
+
 
 import ProjectRootDir
 import com.aballano.mnemonik.memoizeSuspend
 import com.github.pgreze.process.*
+
 import maven.*
-import readUpdateTimes
-import java.nio.file.Path
+import java.nio.file.*
 import kotlin.io.path.absolute
 import kotlin.io.path.exists
 
@@ -88,14 +88,32 @@ suspend fun GradlewFile.setVersion(newVersion: String) {
 internal fun <K, V> keysOfChanges(old: Map<K, V>, new: Map<K, V>): List<K> =
     (old.keys + new.keys).filter { (old[it] ?: 0) != (new[it] ?: 0) }
 
-suspend fun GradlewFile.publishAndDetect(publicationName: String?): MetadataLocalXmlFile {
-    val old = readUpdateTimes()
+
+suspend fun GradlewFile.publishAndDetect(ga: GroupArtifact, publicationName: String?): MetadataLocalXmlFile {
+    //val old = readUpdateTimes()
+    fun xml() = ga.expectedLocalXmlFile(ga)
+
+    val oldXml = xml()
+
+    val oldLastUpdated = try {
+        oldXml.lastUpdated
+    } catch (_: Throwable) {
+        "none"
+    }
+
     this.publishLocal(publicationName)
-    val new = readUpdateTimes()
-    val changed = keysOfChanges(old, new)
-    if (changed.size != 1)
-        throw Exception("Cannot detect what is published. Files updated: $changed")
-    return changed[0]
+    val newXml = xml()
+
+    check(newXml.file.exists()) { "File '${newXml.file} not found'" }
+    check(newXml.lastUpdated != oldLastUpdated) {
+        "'lastUpdated' value was not changed in ${newXml.file}"}
+
+    return newXml
+    //val new = readUpdateTimes()
+    //val changed = keysOfChanges(old, new)
+    //if (changed.size != 1)
+    //    throw Exception("Cannot detect what is published. Files updated: $changed")
+    //return changed[0]
 }
 
 // publishCentralPublicationToMavenLocal

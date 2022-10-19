@@ -3,7 +3,7 @@ import org.jsoup.Jsoup
 import stages.sign.isSignature
 import tools.*
 import java.io.File
-import java.nio.file.Path
+import java.nio.file.*
 import kotlin.io.path.*
 
 private fun listMavenMetadataLocals(): Sequence<MetadataLocalXmlFile> {
@@ -11,19 +11,11 @@ private fun listMavenMetadataLocals(): Sequence<MetadataLocalXmlFile> {
     val m2 = home.resolve(".m2")
     check(m2.exists()) { "$m2 not found" }
     return m2.walk().filter { it.name == "maven-metadata-local.xml" && it.isFile }
-        .map { MetadataLocalXmlFile(it.absoluteFile) }
+        .map { MetadataLocalXmlFile(it.absoluteFile.toPath()) }
 }
 
-@JvmInline
-value class MetadataLocalXmlFile(val file: File) {
-    init {
-        require(file.name == "maven-metadata-local.xml")
-    }
 
-    fun latest() = Version(
-        Jsoup.parse(file.readText())
-            .select("metadata > versioning > latest").single().text())
-}
+
 
 @JvmInline
 value class MavenArtifactDir(val path: Path) {
@@ -48,7 +40,7 @@ fun readUpdateTimes(): Map<MetadataLocalXmlFile, Long> =
         .toMap()
 
 fun MetadataLocalXmlFile.toMavenArtifactDir() =
-    MavenArtifactDir(this.file.toPath().parent.resolve(this.latest().string))
+    MavenArtifactDir(this.file.parent.resolve(this.latest.string))
 
 fun MavenArtifactDir.asUnsignedFileset() = UnsignedMavenFileset(
     this.path.listDirectoryEntries().filter { !it.isSignature }

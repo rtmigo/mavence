@@ -1,4 +1,5 @@
 import com.github.ajalt.clikt.core.*
+import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.*
 import kotlinx.coroutines.runBlocking
 import maven.*
@@ -8,7 +9,7 @@ import tools.*
 
 import java.nio.file.*
 
-val m2str = Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
+
 
 
 class Cli : NoOpCliktCommand(
@@ -28,7 +29,7 @@ class Cli : NoOpCliktCommand(
 
 
 open class Local(help: String="Build, publish to $m2str") : CliktCommand(help = help) {
-    val groupAndArtifact by option("--artifact").required()
+    val groupAndArtifact by argument("<artifact>")
 
     override fun run() = runBlocking {
         cmdLocal(GroupArtifact.parse(groupAndArtifact))
