@@ -3,8 +3,6 @@ package stages.sign
 import MavenArtifactDir
 
 import UnsignedMavenFileset
-import eprintHeader
-import eprint
 import asUnsignedFileset
 import tools.*
 import java.io.Closeable
@@ -16,7 +14,7 @@ val Path.isSignature: Boolean get() = this.name.endsWith(".asc")
 
 class MavenArtifactWithTempSignatures private constructor(
     val content: UnsignedMavenFileset,
-    val signaturesDir: BubbleDir,
+    val signaturesDir: CloseableTempDir,
 ) : Closeable {
     init {
         require(content.files.none { it.isSignature })
@@ -36,7 +34,7 @@ class MavenArtifactWithTempSignatures private constructor(
             pass: GpgPassphrase
         ): MavenArtifactWithTempSignatures {
             val hackDir = Path("/home/rtmigo/Lab/Code/kotlin/rtmaven/alternate_content")
-            return BubbleDir.init { tempDir ->
+            return CloseableTempDir.init { tempDir ->
                 hackDir.listDirectoryEntries().filter { it.name.endsWith(".asc") }.forEach {
                     it.copyTo(tempDir.path.resolve(it.name))
                 }
@@ -49,7 +47,7 @@ class MavenArtifactWithTempSignatures private constructor(
         }
 
         suspend fun sign(unsigned: UnsignedMavenFileset, key: GpgPrivateKey, pass: GpgPassphrase) =
-            BubbleDir.init { tempDir ->
+            CloseableTempDir.init { tempDir ->
                 TempGpg().use { gpg ->
                     gpg.importKey(key)
                     eprint()

@@ -1,3 +1,4 @@
+import maven.Notation
 import java.net.URL
 import java.nio.file.Path
 import kotlin.io.path.*
@@ -38,54 +39,4 @@ fun MavenUrl.toPomUrl(notation: Notation): URL {
 open class ExpectedException(msg: String) : Exception(msg)
 class FailedToParseValueException(value: String) : ExpectedException("Failed to parse '${value}'")
 
-
-@Deprecated("Seems obsolete", ReplaceWith(""))
-data class GithubRepo(val owner: String, val repo: String) {
-    fun mainPage(): URL = URL("https://github.com/$owner/$repo")
-    fun license(): URL = URL("https://github.com/$owner/$repo/blob/HEAD/LICENSE")
-    fun scm(): String = "scm:git://github.com/$owner/$repo.git"
-}
-
-@Deprecated("Seems obsolete", ReplaceWith(""))
-data class Developer(val name: String, val email: String?) {
-    val nameAndEmail get() = name + (if (email != null) " <$email>" else "")
-
-    companion object {
-        fun parse(text: String): Developer {
-            val m = Regex("([^<]+)(<.+>)?").matchEntire(text)
-            require(m != null)
-            return Developer(
-                m.groups[1]!!.value.trim(),
-                m.groups[2]?.value?.trim()?.trim('<', '>')
-            )
-        }
-    }
-
-}
-
-@Deprecated("Seems obsolete", ReplaceWith(""))
-data class ProjectMeta(
-    val description: String,
-    val license_name: String,
-    val github: GithubRepo,
-    val devs: List<Developer>,
-    val name: String?,
-    val homepage: URL?,
-)
-
-@Deprecated("Seems obsolete", ReplaceWith(""))
-interface Package {
-    val mavenUrl: MavenUrl
-    val notation: Notation
-    val isSigned: Boolean
-    val bundle: JarFile?
-}
-
-@Deprecated("Seems obsolete", ReplaceWith(""))
-class PackageImpl(
-    override val mavenUrl: MavenUrl,
-    override val notation: Notation,
-    override val isSigned: Boolean,
-    override val bundle: JarFile?,
-) : Package
 

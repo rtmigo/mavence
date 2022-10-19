@@ -1,11 +1,12 @@
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
+import maven.*
 import stages.build.*
-import tools.PomXml
+import tools.*
 import java.nio.file.Paths
 import kotlin.io.path.*
 
-suspend fun cmdLocal(isFinal: Boolean = false): MavenArtifactDir {
+suspend fun cmdLocal(ga: GroupArtifact, isFinal: Boolean = false): MavenArtifactDir {
     eprintHeader("Publishing to $m2str")
     val f = Paths.get(".")
         .toGradlew().publishAndDetect(null)

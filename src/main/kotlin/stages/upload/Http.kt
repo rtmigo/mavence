@@ -1,9 +1,7 @@
 package stages.upload
 
 import MavenUrl
-import Notation
-import eprint
-import eprintHeader
+
 import io.ktor.client.*
 import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
@@ -15,7 +13,9 @@ import io.ktor.http.*
 import kotlinx.coroutines.delay
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
+import maven.Notation
 import toPomUrl
+import tools.*
 import java.net.*
 import java.nio.file.Path
 import java.text.*
@@ -34,7 +34,6 @@ fun createClient(user: SonatypeUsername, pass: SonatypePassword): HttpClient =
                 logger = object : Logger {
                     override fun log(message: String) {
                         eprint("# ktor ###\n$message\n# /ktor ##")
-                        //Napier.v(message+"\n", null, "Ktor") // message + "\n\n"
                     }
                 }
                 level = if (insecureHttpLogging())
@@ -65,7 +64,7 @@ fun createClient(user: SonatypeUsername, pass: SonatypePassword): HttpClient =
 value class StagingRepoId(val string: String)
 
 
-class StagingUri(url: URL): MavenUrl(url) {
+class StagingUri(url: URL) : MavenUrl(url) {
     init {
         require(url.host.contains("oss.sonatype.org"))
     }
@@ -77,13 +76,6 @@ class StagingUri(url: URL): MavenUrl(url) {
 @Serializable
 private data class StagingRepoCreatedResponse(val repositoryUris: List<String>)
 
-//suspend fun HttpClient.sendToStaging(file: Path, notation: Notation): StagingUri {
-//    file.copyTo(Paths.get("/home/rtmigo/Lab/Code/kotlin/rtmaven/ourjar.jar"), true)
-//    return sendToStaging1(
-//        Path("/home/rtmigo/Lab/Code/kotlin/precise_kt/build/rtmaven/deploy/jarjar.jar"),
-//        notation
-//    )
-//}
 
 fun humanReadableByteCountSI(bytes: Long): String {
     var bytes = bytes
@@ -101,25 +93,26 @@ fun humanReadableByteCountSI(bytes: Long): String {
 suspend fun HttpClient.sendToStaging(file: Path, notation: Notation): StagingUri {
 
     require(file.name.endsWith(".jar"))
-    eprintHeader("Uploading ${file.name} " +
-                     "(${humanReadableByteCountSI(file.toFile().length())}) to Staging")
+    eprintHeader(
+        "Uploading ${file.name} " +
+            "(${humanReadableByteCountSI(file.toFile().length())}) to Staging")
     return this.submitFormWithBinaryData(
         url = "https://s01.oss.sonatype.org/service/local/staging/bundle_upload",
         formData = formData {
-            append("file", file.readBytes(),
+            append("file.jar", file.readBytes(),
                    headers = Headers.build {
-                       //set("Content-Type", "application/java-archive")
                        set(
                            "Content-Disposition",
-                           """form-data; name="bundle.jar"; filename="bundle.jar"""")
-                   })
+                           """form-data; name="file.jar"; filename="file.jar"""")
+                   }
+            )
         }) {
     }.let { resp ->
         check(resp.status.value == 201) {
             "Sending failed: ${resp.status}.\n${resp.bodyAsText()}"
         }
-        eprint("File $file successfully sent")
-        //println(resp.bodyAsText())
+        eprint("File ${file.name} sent successfully")
+
         val result = Json.decodeFromString<StagingRepoCreatedResponse>(resp.bodyAsText())
         val uri = URI(result.repositoryUris.single())
         eprint()
@@ -154,14 +147,13 @@ suspend fun HttpClient.waitForUri(
 
     suspend fun delayWithDots(attempt: Int) =
         repeat(attempt) {
-            delay((attempt*200).milliseconds)
+            delay((attempt * 200).milliseconds)
             System.err.print('.')
         }
 
     val startMs = System.currentTimeMillis()
 
-    for (attempt in (1..Int.MAX_VALUE))
-    {
+    for (attempt in (1..Int.MAX_VALUE)) {
         System.err.print("($attempt) Requesting POM... ")
         if (this.get(uri.toPomUrl(notation)).status.isSuccess()) {
             System.err.println("SUCCESS!!")
@@ -169,12 +161,11 @@ suspend fun HttpClient.waitForUri(
         }
         System.err.print("Not yet. ")
 
-        if ((System.currentTimeMillis()-startMs)<maxWait.inWholeMilliseconds) {
+        if ((System.currentTimeMillis() - startMs) < maxWait.inWholeMilliseconds) {
             System.err.print("Sleeping")
             delayWithDots(attempt.coerceAtMost(15))
             System.err.println()
-        }
-        else
+        } else
             error("Failed to get the artifact. Maybe you uploaded non-unique version?")
     }
 }
@@ -201,7 +192,3 @@ suspend fun HttpClient.promoteToCentral(uri: StagingUri) {
             }
         }
 }
-
-//suspend fun testSendToStaging() {
-//    HttpClient()
-//}

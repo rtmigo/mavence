@@ -18,28 +18,28 @@ repositories {
 }
 
 dependencies {
-    implementation("org.redundent:kotlin-xml-builder:1.8.0")
-    implementation("com.github.pgreze:kotlin-process:1.4")
-    implementation("com.github.aballano:mnemonik:2.1.1")
-    //implementation("org.simpleframework:simple-xml:2.7.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("com.github.ajalt.clikt:clikt:3.5.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
-    testImplementation("io.kotest:kotest-assertions-core:5.5.0")
-    implementation("io.github.aakira:napier:2.6.1")
-    implementation("org.jsoup:jsoup:1.14.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
-}
 
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0") // testing
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0") // testing
+    testImplementation("io.kotest:kotest-assertions-core:5.5.0")// testing
 
+    implementation("com.github.pgreze:kotlin-process:1.4") // running processes
+    implementation("com.github.aballano:mnemonik:2.1.1") // caching function results
 
-dependencies {
+    implementation("com.github.ajalt.clikt:clikt:3.5.0") // parsing cli args
+    implementation("org.jsoup:jsoup:1.14.3") // parsing xml
+    implementation("org.jline:jline:3.21.0") // terminal size
+
+    implementation("org.redundent:kotlin-xml-builder:1.8.0")  // building XML (unused)
+    implementation("io.github.aakira:napier:2.6.1") // logging (unused)
+
     val ktor = "2.1.2"
-    implementation("io.ktor:ktor-client-core:$ktor")
-    implementation("io.ktor:ktor-client-cio:$ktor")
-    implementation("io.ktor:ktor-client-auth:$ktor")
-    implementation("io.ktor:ktor-client-logging:$ktor")
+    implementation("io.ktor:ktor-client-core:$ktor") // http
+    implementation("io.ktor:ktor-client-cio:$ktor") // http
+    implementation("io.ktor:ktor-client-auth:$ktor") // http
+    implementation("io.ktor:ktor-client-logging:$ktor") // http
 }
 
 tasks.test {

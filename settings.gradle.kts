@@ -1,3 +1,3 @@
 
-rootProject.name = "rtmaven"
+rootProject.name = "mavence"
 

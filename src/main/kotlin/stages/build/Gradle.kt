@@ -4,12 +4,13 @@ import ArtifactDir
 import BuildGradleFile
 import ExpectedException
 import GradlewFile
-import Group
+
 import MetadataLocalXmlFile
-import Notation
+
 import ProjectRootDir
 import com.aballano.mnemonik.memoizeSuspend
 import com.github.pgreze.process.*
+import maven.*
 import readUpdateTimes
 import java.nio.file.Path
 import kotlin.io.path.absolute

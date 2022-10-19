@@ -1,6 +1,7 @@
 import io.kotest.matchers.shouldBe
+import maven.PomXml
 import org.junit.jupiter.api.Test
-import tools.PomXml
+
 
 class PomParsingTest {
     @Test

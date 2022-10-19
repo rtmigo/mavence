@@ -1,24 +1,10 @@
-package tools
+package maven
 
-import Artifact
-import Group
-import Notation
-import Version
 import org.jsoup.Jsoup
-
-//fun xmlElementText(xml: String, tag: String) =
-//    try {
-//        Regex("""<\s*$tag\s*>([^<]*)<\s*/\s*$tag\s*>""").findAll(xml).single().let {
-//            //check(it != null) { "Element $tag not found" }
-//            it.groups[1]!!.value
-//        }
-//    } catch (e: Throwable) {
-//        throw Exception("Failed to find single element with tag '$tag'.", e)
-//    }
 
 
 data class PomXml(val xml: String) {
-    val soup = Jsoup.parse(xml)
+    private val soup = Jsoup.parse(xml)
 
     init {
         require(modelVersion() == "4.0.0") { "Unsupported model version" }
@@ -56,6 +42,10 @@ data class PomXml(val xml: String) {
         this.scmConnection()
         this.scmUrl()
         this.url()
+
+        soup.select("project > licenses > license")
+            .also { check(it.size>=1) }
+            .forEach { it.select("license > name") }
 
         requireAtLeastOne("project > licenses > license > name")
         requireAtLeastOne("project > licenses > license > url")

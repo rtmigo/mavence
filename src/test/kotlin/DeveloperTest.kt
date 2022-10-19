@@ -1,4 +1,5 @@
 import io.kotest.matchers.shouldBe
+import maven.Developer
 import org.junit.jupiter.api.Test
 
 class DeveloperTest {

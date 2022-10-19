@@ -1,9 +1,38 @@
+package maven
+
+
+import PomFile
 import org.redundent.kotlin.xml.*
 import stages.build.Dependency
+import java.net.URL
 import java.nio.file.Path
 import kotlin.io.path.writeText
 
 @Deprecated("Seems obsolete", ReplaceWith(""))
+data class GithubRepo(val owner: String, val repo: String) {
+    fun mainPage(): URL = URL("https://github.com/$owner/$repo")
+    fun license(): URL = URL("https://github.com/$owner/$repo/blob/HEAD/LICENSE")
+    fun scm(): String = "scm:git://github.com/$owner/$repo.git"
+}
+
+@Deprecated("Seems obsolete", ReplaceWith(""))
+data class Developer(val name: String, val email: String?) {
+    val nameAndEmail get() = name + (if (email != null) " <$email>" else "")
+
+    companion object {
+        fun parse(text: String): Developer {
+            val m = Regex("([^<]+)(<.+>)?").matchEntire(text)
+            require(m != null)
+            return Developer(
+                m.groups[1]!!.value.trim(),
+                m.groups[2]?.value?.trim()?.trim('<', '>')
+            )
+        }
+    }
+
+}
+
+@Deprecated("Since 2022-10", ReplaceWith(""))
 data class PomData(
     val notation: Notation,
     val description: String,
@@ -13,7 +42,7 @@ data class PomData(
     val dependencies: List<Dependency>,
 )
 
-@Deprecated("Seems obsolete", ReplaceWith(""))
+@Deprecated("Since 2022-10", ReplaceWith(""))
 fun PomData.toXml(): String =
     xml("project") {
         "modelVersion" { -"4.0.0" }
@@ -62,7 +91,7 @@ fun PomData.toXml(): String =
                 |"http://maven.apache.org/POM/4.0.0
                 | https://maven.apache.org/xsd/maven-4.0.0.xsd">""".trimMargin())
 
-@Deprecated("Seems obsolete", ReplaceWith(""))
+@Deprecated("Since 2022-10", ReplaceWith(""))
 fun PomData.writeToDir(target: Path): PomFile {
     val p = target.resolve("${this.notation.artifact}-${this.notation.version}.pom")
     p.writeText(this.toString())

@@ -1,6 +1,7 @@
 import com.github.ajalt.clikt.core.*
 import com.github.ajalt.clikt.parameters.options.*
 import kotlinx.coroutines.runBlocking
+import maven.*
 import stages.sign.cmdSign
 import stages.upload.*
 import tools.*
@@ -9,30 +10,16 @@ import java.nio.file.*
 
 val m2str = Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
 
-fun eprintHeader(text: String) {
-    fun sized(n: Int) = List(n) { '•' }.joinToString("")
-    //val line = List(80) { '%' }.joinToString("")
-    System.err.println()
-    val prefix = "••[ "+text.uppercase()+" ]"
-    System.err.println(prefix+sized(80-prefix.length))
-    //System.err.println("  $text")
-    //System.err.println(line)
-    System.err.println()
-}
-
-fun eprint(s: String) = System.err.println(s)
-fun eprint() = System.err.println("")
-
 
 class Cli : NoOpCliktCommand(
-    name = "rtmaven",
-    help = "Publishes Gradle projects to Maven Central\n\nSee: https://github.com/rtmigo/rtmaven_kt#readme"
+    name = "mavence",
+    help = "Publishes Gradle projects to Maven Central\n\nSee: https://github.com/rtmigo/mavence#readme"
 ) {
     init {
         versionOption(Build.version) {
             "$commandName $it (${Build.date})\n" +
                 "MIT (c) Artsiom iG <ortemeo@gmail.com>\n" +
-                "http://github.com/rtmigo/rtmaven_kt"
+                "http://github.com/rtmigo/mavence"
         }
     }
 
@@ -40,27 +27,17 @@ class Cli : NoOpCliktCommand(
 }
 
 
-class Local : CliktCommand(help = "Build, publish to $m2str") {
+open class Local(help: String="Build, publish to $m2str") : CliktCommand(help = help) {
+    val groupAndArtifact by option("--artifact").required()
+
     override fun run() = runBlocking {
-        cmdLocal()
+        cmdLocal(GroupArtifact.parse(groupAndArtifact))
         Unit
     }
 }
 
-//open class Signed(help: String = "Build, sign, publish to $m2str") :
-//    CliktCommand(help = help) {
-//    val gpgKey by option("--gpg-key", envvar = "MAVEN_GPG_KEY").required()
-//    val gpgPwd by option("--gpg-password", envvar = "MAVEN_GPG_PASSWORD").required()
-//    override fun run() = runBlocking {
-//        cmdSign(
-//            cmdLocal(),
-//            key = GpgPrivateKey(gpgKey),
-//            pass = GpgPassphrase(gpgPwd)
-//        ).close()
-//    }
-//}
-
-open class Stage(help: String = "Build, sign, publish to OSSRH Staging") : CliktCommand(help = help) {
+open class Stage(help: String = "Build, sign, publish to OSSRH Staging") :
+    Local(help = help) {
     val gpgKey by option("--gpg-key", envvar = "MAVEN_GPG_KEY").required()
     val gpgPwd by option("--gpg-password", envvar = "MAVEN_GPG_PASSWORD").required()
 
@@ -73,15 +50,14 @@ open class Stage(help: String = "Build, sign, publish to OSSRH Staging") : Clikt
 
     override fun run() = runBlocking {
         cmdSign(
-            cmdLocal(),
+            cmdLocal(GroupArtifact.parse(this@Stage.groupAndArtifact)),
             key = GpgPrivateKey(gpgKey),
             pass = GpgPassphrase(gpgPwd)
-        ).use { signed ->
-            cmdToStaging(
-                signed,
+        ).use {
+            it.toStaging(
                 user = SonatypeUsername(sonatypeUser),
                 pass = SonatypePassword(sonatypePassword),
-                signed.content.notation)
+                it.content.notation)
         }
         Unit
     }
@@ -90,20 +66,16 @@ open class Stage(help: String = "Build, sign, publish to OSSRH Staging") : Clikt
 class Central : Stage(help = "Build, sign, publish to OSSRH Staging, release to Central") {
     override fun run() = runBlocking {
         cmdSign(
-            cmdLocal(),
+            cmdLocal(GroupArtifact.parse(groupAndArtifact)),
             key = GpgPrivateKey(gpgKey),
             pass = GpgPassphrase(gpgPwd)
         ).use { signed ->
             val user = SonatypeUsername(sonatypeUser)
             val pass = SonatypePassword(sonatypePassword)
-            cmdToStaging(
-                signed,
+            signed.toStaging(
                 user = user,
                 pass = pass,
-                signed.content.notation)
-                .let { stagingUri ->
-                    cmdToRelease(stagingUri, user = user, pass = pass)
-                }
+                signed.content.notation).toRelease(user = user, pass = pass)
         }
     }
 }

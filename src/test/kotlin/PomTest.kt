@@ -1,4 +1,5 @@
 import io.kotest.matchers.booleans.shouldBeTrue
+import maven.*
 import org.junit.jupiter.api.Test
 import stages.build.Dependency
 

@@ -1,9 +1,7 @@
 package stages.upload
 
-import Notation
-import io.ktor.client.*
-import eprintHeader
-import eprint
+
+import maven.Notation
 import stages.sign.*
 import tools.*
 import java.io.Closeable
@@ -16,48 +14,27 @@ value class SonatypeUsername(val string: String)
 @JvmInline
 value class SonatypePassword(val string: String)
 
-class SignedBundle(val jar: Path, private val tempDir: BubbleDir) : Closeable {
+class SignedBundle(val jar: Path, private val tempDir: CloseableTempDir) : Closeable {
     companion object {
+
+        private fun basename(nota: Notation) =
+            "${nota.artifact.string}-${nota.version.string}-binks.jar"
+
         suspend fun fromFiles(src: MavenArtifactWithTempSignatures) =
-            BubbleDir.init { tempDir ->
-                val targetJar = tempDir.path.resolve("jarof.jar")
+            CloseableTempDir.init { tempDir ->
+                val targetJar = tempDir.path.resolve(basename(src.content.notation))
                 val sources = src.content.files + src.signaturesDir.path.listDirectoryEntries()
-                Jar.addByBasenames(
+                Jar.addByNames(
                     sources,
                     targetJar
                 )
+
                 SignedBundle(targetJar, tempDir)
             }
     }
 
     override fun close() {
         tempDir.close()
-    }
-}
-
-suspend fun cmdToStaging(
-    mad: MavenArtifactWithTempSignatures,
-    user: SonatypeUsername,
-    pass: SonatypePassword,
-    notation: Notation
-): StagingUri {
-    eprintHeader("Creating JAR of JARs")
-    return SignedBundle.fromFiles(mad).use { bundle ->
-        createClient(user, pass).use {
-            it.sendToStaging(bundle.jar, notation)
-        }
-    }
-}
-
-suspend fun cmdToRelease(
-    uri: StagingUri,
-    user: SonatypeUsername,
-    pass: SonatypePassword,
-) {
-    createClient(user, pass).use {
-        it.promoteToCentral(uri)
-        eprint("HOORAY! We have released the package in Maven Central!")
-        eprint("The release may take some time.")
     }
 }
 

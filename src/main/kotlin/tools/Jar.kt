@@ -37,7 +37,7 @@ object Jar {
     }
 }
 
-suspend fun Jar.addByBasenames(files: List<Path>, target: Path) {
+suspend fun Jar.addByNames(files: List<Path>, target: Path) {
     require(target.name.endsWith(".jar"))
     check(!target.exists())
     check(files.size==files.map { it.name }.distinct().size)
