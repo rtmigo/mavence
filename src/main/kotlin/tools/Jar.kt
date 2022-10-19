@@ -43,7 +43,7 @@ suspend fun Jar.addByBasenames(files: List<Path>, target: Path) {
     check(files.size==files.map { it.name }.distinct().size)
     assert(files.all { it.exists() })
 
-    val fileArgs = files.map { listOf("-C", it.parent.toString(), it.name) }.flatten()
+    val fileArgs = files.sortedBy { it.name } .map { listOf("-C", it.parent.toString(), it.name) }.flatten()
 
     val allArgs = listOf(this.exe(), "cvf", target.toString()) + fileArgs
     process(command=allArgs.toTypedArray()).unwrap()

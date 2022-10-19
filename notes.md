@@ -1,4 +1,9 @@
 
+```bash
+VERSION=$(rtmaven local)
+
+./runtest.sh $VERSION
+```
 
 To quickly configure the variables in local Bash session, you can edit the
 following and then just paste to the terminal. Private data will not get into

@@ -2,25 +2,27 @@ package stages.upload
 
 import MavenUrl
 import Notation
+import eprint
+import eprintHeader
 import io.ktor.client.*
 import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.logging.*
-import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import kotlinx.serialization.*
-import eprintHeader
-import eprint
 import kotlinx.coroutines.delay
-import kotlinx.serialization.json.*
+import kotlinx.serialization.*
+import kotlinx.serialization.json.Json
 import toPomUrl
 import java.net.*
-import java.nio.file.*
+import java.nio.file.Path
+import java.text.*
 import kotlin.io.path.*
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
+
 
 private fun insecureHttpLogging() = System.getenv("INSECURE_HTTP_LOGGING") == "1"
 
@@ -83,10 +85,24 @@ private data class StagingRepoCreatedResponse(val repositoryUris: List<String>)
 //    )
 //}
 
+fun humanReadableByteCountSI(bytes: Long): String {
+    var bytes = bytes
+    if (-1000 < bytes && bytes < 1000) {
+        return "$bytes B"
+    }
+    val ci: CharacterIterator = StringCharacterIterator("kMGTPE")
+    while (bytes <= -999950 || bytes >= 999950) {
+        bytes /= 1000
+        ci.next()
+    }
+    return String.format("%.1f %cB", bytes / 1000.0, ci.current())
+}
+
 suspend fun HttpClient.sendToStaging(file: Path, notation: Notation): StagingUri {
 
     require(file.name.endsWith(".jar"))
-    eprintHeader("Uploading $file (sized ${file.toFile().length()}) to Staging")
+    eprintHeader("Uploading ${file.name} " +
+                     "(${humanReadableByteCountSI(file.toFile().length())}) to Staging")
     return this.submitFormWithBinaryData(
         url = "https://s01.oss.sonatype.org/service/local/staging/bundle_upload",
         formData = formData {
@@ -106,7 +122,9 @@ suspend fun HttpClient.sendToStaging(file: Path, notation: Notation): StagingUri
         //println(resp.bodyAsText())
         val result = Json.decodeFromString<StagingRepoCreatedResponse>(resp.bodyAsText())
         val uri = URI(result.repositoryUris.single())
-        eprint("Staging repo URI: $uri")
+        eprint()
+        eprint("Staging repo:\n$uri")
+        eprint()
         val resultUrl = StagingUri(uri.toURL())
         this.waitForUri(resultUrl, notation)
         resultUrl
@@ -128,14 +146,15 @@ private data class BulkPromoteRequest(
 suspend fun HttpClient.waitForUri(
     uri: StagingUri,
     notation: Notation,
-    maxWait: kotlin.time.Duration = 2.minutes
+    maxWait: kotlin.time.Duration = 2.minutes,
 ) {
     val pomUrl = uri.toPomUrl(notation)
-    eprint("Expected POM URL: $pomUrl")
+    eprint("POM URL: $pomUrl")
+    eprint()
 
     suspend fun delayWithDots(attempt: Int) =
         repeat(attempt) {
-            delay(attempt*333L)
+            delay((attempt*200).milliseconds)
             System.err.print('.')
         }
 
@@ -143,7 +162,7 @@ suspend fun HttpClient.waitForUri(
 
     for (attempt in (1..Int.MAX_VALUE))
     {
-        System.err.print("Attempt $attempt to get POM... ")
+        System.err.print("($attempt) Requesting POM... ")
         if (this.get(uri.toPomUrl(notation)).status.isSuccess()) {
             System.err.println("SUCCESS!!")
             break

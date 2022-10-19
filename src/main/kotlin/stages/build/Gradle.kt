@@ -102,9 +102,11 @@ suspend fun GradlewFile.publishAndDetect(publicationName: String?): MetadataLoca
 suspend fun GradlewFile.publishLocal(publicationName: String?) {
     process(
         this.path.toString(), this.publishTaskName(publicationName),
-        directory = this.path.parent.toFile()).unwrap()
+        directory = this.path.parent.toFile(),
+        stdout = Redirect.Consume { it.collect { System.err.println(it) } }
+    ).unwrap()
     //stderr = Redirect.Consume { it.collect { System.out.print(it) } },
-    //stdout = Redirect.Consume { it.collect { System.err.println(it) } }
+
 //    ).also {
 //        check(it.resultCode == 0)
 //    }

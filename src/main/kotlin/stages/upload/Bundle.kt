@@ -20,7 +20,7 @@ class SignedBundle(val jar: Path, private val tempDir: BubbleDir) : Closeable {
     companion object {
         suspend fun fromFiles(src: MavenArtifactWithTempSignatures) =
             BubbleDir.init { tempDir ->
-                val targetJar = tempDir.path.resolve("bundle.jar")
+                val targetJar = tempDir.path.resolve("jarof.jar")
                 val sources = src.content.files + src.signaturesDir.path.listDirectoryEntries()
                 Jar.addByBasenames(
                     sources,

@@ -4,21 +4,21 @@ private fun looksLikeMavenAllowed(s: String): Boolean =
 @JvmInline
 value class Artifact(val string: String) {
     init {
-        require(looksLikeMavenAllowed(string))
+        require(looksLikeMavenAllowed(string)) { "Illegal artifact name: '$string'" }
     }
 }
 
 @JvmInline
 value class Group(val string: String) {
     init {
-        require(looksLikeMavenAllowed(string))
+        require(looksLikeMavenAllowed(string)) { "Illegal group name: '$string'" }
     }
 }
 
 @JvmInline
 value class Version(val string: String) {
     init {
-        require(string.isNotEmpty() && string[0].isDigit())
+        require(string.isNotEmpty() && string[0].isDigit())  { "Illegal version: '$string'" }
     }
 }
 

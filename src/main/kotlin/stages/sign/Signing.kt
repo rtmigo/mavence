@@ -30,7 +30,11 @@ class MavenArtifactWithTempSignatures private constructor(
     }
 
     companion object {
-        suspend fun sign_not_really(unsigned: UnsignedMavenFileset, key: GpgPrivateKey, pass: GpgPassphrase): MavenArtifactWithTempSignatures {
+        suspend fun sign_not_really(
+            unsigned: UnsignedMavenFileset,
+            key: GpgPrivateKey,
+            pass: GpgPassphrase
+        ): MavenArtifactWithTempSignatures {
             val hackDir = Path("/home/rtmigo/Lab/Code/kotlin/rtmaven/alternate_content")
             return BubbleDir.init { tempDir ->
                 hackDir.listDirectoryEntries().filter { it.name.endsWith(".asc") }.forEach {
@@ -40,21 +44,25 @@ class MavenArtifactWithTempSignatures private constructor(
                     UnsignedMavenFileset(
                         hackDir.listDirectoryEntries().filter { !it.name.endsWith(".asc") }),
                     tempDir
-                    )
+                )
             }
         }
+
         suspend fun sign(unsigned: UnsignedMavenFileset, key: GpgPrivateKey, pass: GpgPassphrase) =
             BubbleDir.init { tempDir ->
                 TempGpg().use { gpg ->
                     gpg.importKey(key)
+                    eprint()
                     unsigned.files.forEach {
+
                         val target = tempDir.path.resolve(it.name + ".asc")
-                        eprint()
-                        eprint("src $it\nsig $target")
+                        eprint("+ " + target.name)
+                        //eprint()
+                        //eprint("src $it\nsig $target")
                         gpg.signFile(it, pass, target)
                     }
                 }
-                eprint()
+                //eprint()
                 assert(tempDir.path.listDirectoryEntries().size == unsigned.files.size)
                 return@init MavenArtifactWithTempSignatures(unsigned, tempDir)
             }
@@ -64,7 +72,11 @@ class MavenArtifactWithTempSignatures private constructor(
 suspend fun UnsignedMavenFileset.toSigned(key: GpgPrivateKey, pass: GpgPassphrase) =
     MavenArtifactWithTempSignatures.sign(this, key, pass)
 
-suspend fun cmdSign(mad: MavenArtifactDir, key: GpgPrivateKey, pass: GpgPassphrase): MavenArtifactWithTempSignatures {
+suspend fun cmdSign(
+    mad: MavenArtifactDir,
+    key: GpgPrivateKey,
+    pass: GpgPassphrase
+): MavenArtifactWithTempSignatures {
     eprintHeader("Signing in the rain")
     return mad.asUnsignedFileset().toSigned(key, pass)
 }
