@@ -1,5 +1,6 @@
 package stages.upload
 
+import Notation
 import io.ktor.client.*
 import eprintHeader
 import eprint
@@ -38,11 +39,12 @@ suspend fun cmdToStaging(
     mad: MavenArtifactWithTempSignatures,
     user: SonatypeUsername,
     pass: SonatypePassword,
-): Pair<HttpClient, StagingUri> {
-    eprintHeader("Creating bundle.jar")
+    notation: Notation
+): StagingUri {
+    eprintHeader("Creating JAR of JARs")
     return SignedBundle.fromFiles(mad).use { bundle ->
         createClient(user, pass).use {
-            it to it.sendToStaging(bundle.jar)
+            it.sendToStaging(bundle.jar, notation)
         }
     }
 }

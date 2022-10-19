@@ -6,17 +6,17 @@ import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.*
 
-private fun listMavenMetadataLocals(): Sequence<MmdlxFile> {
+private fun listMavenMetadataLocals(): Sequence<MetadataLocalXmlFile> {
     val home = File(System.getProperty("user.home"))
     val m2 = home.resolve(".m2")
     check(m2.exists()) { "$m2 not found" }
     return m2.walk().filter { it.name == "maven-metadata-local.xml" && it.isFile }
-        .map { MmdlxFile(it.absoluteFile) }
+        .map { MetadataLocalXmlFile(it.absoluteFile) }
 }
 
 /// maven-metadata-local.xml
 @JvmInline
-value class MmdlxFile(val file: File) {
+value class MetadataLocalXmlFile(val file: File) {
     init {
         require(file.name=="maven-metadata-local.xml")
     }
@@ -28,52 +28,53 @@ value class MmdlxFile(val file: File) {
 }
 
 @JvmInline
-value class MavenArtifactDir(val path: Path)
+value class MavenArtifactDir(val path: Path) {
+    fun updateInplace() {
+        val pomFile = this.asUnsignedFileset().pomFile
+        Path("/home/rtmigo/Lab/Code/kotlin/rtmaven/override_pom.hack").copyTo(pomFile, overwrite = true)
+        //val pomFile = this.reanUnsigned().pomFile
+        //pomFile.writeText(insertPackaging(pomFile.readText()))
+    }
+}
 
-private fun readLastUpdated(mavenMetaDataLocal: MmdlxFile): Long =
+private fun readLastUpdated(mavenMetaDataLocal: MetadataLocalXmlFile): Long =
     Regex("<lastUpdated>(\\d+)</lastUpdated>")
         .find(mavenMetaDataLocal.file.readText())!!.let {
             it.groupValues[1].toLong()
         }
 
-fun readUpdateTimes(): Map<MmdlxFile, Long> =
+fun readUpdateTimes(): Map<MetadataLocalXmlFile, Long> =
     listMavenMetadataLocals()
         .map { it to readLastUpdated(it) }
         .toMap()
 
-/// maven-metadata-local.xml обычно находится по соседству с единственным каталогом -
-/// тем, где сам артифакт
-fun MmdlxFile.toMavenArtifactFiles(): OldUnsignedMavenArtifactFiles =
-    OldUnsignedMavenArtifactFiles(this.file.toPath().parent.listDirectoryEntries()
-                                      .single { it.isDirectory() }.listDirectoryEntries())
-
-fun MmdlxFile.toMavenArtifactDir() =
+fun MetadataLocalXmlFile.toMavenArtifactDir() =
     MavenArtifactDir(this.file.toPath().parent.resolve(this.latest().string))
 
-fun MavenArtifactDir.reanUnsigned() = UnsMavenArtifactFiles(
+fun MavenArtifactDir.asUnsignedFileset() = UnsignedMavenFileset(
     this.path.listDirectoryEntries().filter { !it.isSignature }
 )
 
-open class UnsMavenArtifactFiles(val files: List<Path>) {
+open class UnsignedMavenFileset(val files: List<Path>) {
     val pomFile = files.single { it.name.endsWith(".pom") }
     val notation by lazy { PomXml(pomFile.readText()).notation() }
 
-    val areSigned: Boolean by lazy {
-        val signaturesCount = files.filter { it.isSignature }.size
-        if (signaturesCount == 0)
-            false
-        else {
-            check(signaturesCount * 2 == this.files.size) { "Unexpected signatures count" }
-            true
-        }
-    }
+//    val areSigned: Boolean by lazy {
+//        val signaturesCount = files.filter { it.isSignature }.size
+//        if (signaturesCount == 0)
+//            false
+//        else {
+//            check(signaturesCount * 2 == this.files.size) { "Unexpected signatures count" }
+//            true
+//        }
+//    }
 }
 
-class SignedMavenArtifactFiles(files: List<Path>) : UnsMavenArtifactFiles(files) {
-    init {
-        require(this.areSigned)
-    }
-}
+//class SignedMavenArtifactFiles(files: List<Path>) : UnsignedMavenFileset(files) {
+//    init {
+//        require(this.areSigned)
+//    }
+//}
 
 
 data class OldUnsignedMavenArtifactFiles(val files: List<Path>) {
@@ -95,7 +96,7 @@ data class OldSignedMavenArtifactFiles(val files: List<Path>) {
     }
 }
 
-suspend fun OldUnsignedMavenArtifactFiles.sign(): OldSignedMavenArtifactFiles {
+suspend fun OldUnsignedMavenArtifactFiles.smiley(): OldSignedMavenArtifactFiles {
     throw NotImplementedError()
     //TempGpg().importKey(mavenGpgKey())
     return OldSignedMavenArtifactFiles(

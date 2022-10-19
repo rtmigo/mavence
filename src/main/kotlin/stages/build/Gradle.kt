@@ -5,7 +5,7 @@ import BuildGradleFile
 import ExpectedException
 import GradlewFile
 import Group
-import MmdlxFile
+import MetadataLocalXmlFile
 import Notation
 import ProjectRootDir
 import com.aballano.mnemonik.memoizeSuspend
@@ -87,7 +87,7 @@ suspend fun GradlewFile.setVersion(newVersion: String) {
 internal fun <K, V> keysOfChanges(old: Map<K, V>, new: Map<K, V>): List<K> =
     (old.keys + new.keys).filter { (old[it] ?: 0) != (new[it] ?: 0) }
 
-suspend fun GradlewFile.publishAndDetect(publicationName: String?): MmdlxFile {
+suspend fun GradlewFile.publishAndDetect(publicationName: String?): MetadataLocalXmlFile {
     val old = readUpdateTimes()
     this.publishLocal(publicationName)
     val new = readUpdateTimes()
@@ -100,7 +100,6 @@ suspend fun GradlewFile.publishAndDetect(publicationName: String?): MmdlxFile {
 // publishCentralPublicationToMavenLocal
 // publishToMavenLocal
 suspend fun GradlewFile.publishLocal(publicationName: String?) {
-    println("Publish local")
     process(
         this.path.toString(), this.publishTaskName(publicationName),
         directory = this.path.parent.toFile()).unwrap()

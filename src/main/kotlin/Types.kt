@@ -17,8 +17,23 @@ value class PomFile(val path: Path) {
 @JvmInline
 value class SignatureFile(val path: Path)
 
-@JvmInline
-value class MavenUrl(val url: URL)
+
+open class MavenUrl(val url: URL)
+
+fun MavenUrl.toPomUrl(notation: Notation): URL {
+    val sb = StringBuilder(this.url.toString().trimEnd('/'))
+    sb.append('/')
+    sb.append(notation.group.string
+                  .replace(':', '/')
+                  .replace('.', '/'))
+    sb.append('/')
+    sb.append(notation.artifact.string)
+    sb.append('/')
+    sb.append(notation.version.string)
+    sb.append('/')
+    sb.append(notation.artifact.string+"-"+notation.version.string+".pom")
+    return URL(sb.toString())
+}
 
 open class ExpectedException(msg: String) : Exception(msg)
 class FailedToParseValueException(value: String) : ExpectedException("Failed to parse '${value}'")

@@ -76,7 +76,8 @@ open class Stage(help: String = "Build, sign, publish to OSSRH Staging") : Signe
             cmdToStaging(
                 signed,
                 user = SonatypeUsername(sonatypeUser),
-                pass = SonatypePassword(sonatypePassword))
+                pass = SonatypePassword(sonatypePassword),
+                signed.content.notation)
         }
         Unit
     }
@@ -89,12 +90,16 @@ class Central : Stage(help = "Build, sign, publish to OSSRH Staging, release to 
             key = GpgPrivateKey(gpgKey),
             pass = GpgPassphrase(gpgPwd)
         ).use { signed ->
+            val user = SonatypeUsername(sonatypeUser)
+            val pass = SonatypePassword(sonatypePassword)
             cmdToStaging(
                 signed,
-                user = SonatypeUsername(sonatypeUser),
-                pass = SonatypePassword(sonatypePassword)).let { (client, uri) ->
-                client.promoteToCentral(uri)
-            }
+                user = user,
+                pass = pass,
+                signed.content.notation)
+                .let { stagingUri ->
+                    cmdToRelease(stagingUri, user = user, pass = pass)
+                }
         }
     }
 }

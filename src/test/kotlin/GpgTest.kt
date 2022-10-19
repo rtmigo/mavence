@@ -1,27 +1,38 @@
 import io.kotest.matchers.booleans.*
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import tools.*
-import java.nio.file.Path
+import java.nio.file.*
+import java.util.zip.CRC32
 import kotlin.io.path.*
+
+private fun crc32(file: Path): String {
+    val crc = CRC32()
+    crc.update(file.readBytes())
+    return crc.value.toString(16).padStart(8, '0')
+}
 
 @OptIn(GpgInternals::class)
 class GpgTest {
-    @Test
-    fun tempDir() = runBlocking {
-        lateinit var theDir: Path
-        TempGpg().use {
-            theDir = it.tempHome
-            theDir.toString().contains("tmp")
-            theDir.exists().shouldBeTrue()
-            it.getHome()
-        }
-        theDir.exists().shouldBeFalse()
-    }
+    val testSignatureForSmiley = """
+        -----BEGIN PGP SIGNATURE-----
+        
+        iQGzBAABCgAdFiEEEpLsQmQkyboKWB7gYMmU/c08rb0FAmNPcEkACgkQYMmU/c08
+        rb1WnwwAlmLYuZ+wAj5sEyK/G+8U9HkY+cCmGbiH4HZD8Kp+WvdzAUQHMeduCeo4
+        KqfVBQxvIbrQBExnVoMOi40mD+CEPn+/u0NIE2PmrnUZSLoPI6PJcWcqoMXskuxb
+        ThmIn/se/bcT3P2vFjjmwH2HFgtZIvrhrxtx14yCDnkb0AqfZMiguMENCrT1XRV9
+        dZyxlVklwhdhBR0B2i8p4fXyUBosu1dlB2ARfcF+g6VxDATmE0cSQ8XY6ipVdI6x
+        c7pOwMn16UnETHvpBWrwoQKYrZkrV/DJQBIn2FFwD77ulp5velx3+8E04mvFCEqw
+        mJv1rGioeUYq14YxmsvLQWGAUMVfn8D3nUetsxz3cMKeDjdZb2994RDATjQd1pPJ
+        HNZcoE4IeshsIT+HI1192J7DErfukvDHG2ndh7OLyxTGBBD9T12fjON7knV7wpar
+        DcBBIItjju0VuKwzTfagQ5D49G6ewVNB5WnWi23v3RsKyChLOkSjmAtScIz1UGNx
+        vfOSLTj2
+        =wkuM
+        -----END PGP SIGNATURE-----        
+    """.trimIndent()
 
-    @Test
-    fun sign() = runBlocking {
-        val testerPrivateKey = """
+    val testerPrivateKey = """
             -----BEGIN PGP PRIVATE KEY BLOCK-----
             
             lQWGBGNOko0BDACzxxMh4EwjlOBRuV94reQglPp5Chzdw4yJHKBYffGGCy27nmde
@@ -108,45 +119,87 @@ class GpgTest {
             -----END PGP PRIVATE KEY BLOCK-----            
         """.trimIndent()
 
-            val tempDir = createTempDirectory("temp")
-            try {
+    val testPassphrase = "password123"
+
+
+    @Test
+    fun tempDir() = runBlocking {
+        lateinit var theDir: Path
+        TempGpg().use {
+            theDir = it.tempHome
+            theDir.toString().contains("tmp")
+            theDir.exists().shouldBeTrue()
+            it.getHome()
+        }
+        theDir.exists().shouldBeFalse()
+    }
+
+    private fun Path.isSignatureFile() = this.readText().trim()
+        .startsWith("-----BEGIN PGP SIGNATURE-----")
+
+    @Test
+    fun smiley() = runBlocking {
+        val tempDir = createTempDirectory("temp")
+        try {
+            TempGpg().use {
                 val fileToSign = tempDir.resolve("file.txt")
+                fileToSign.writeText("^_^")
                 val expectedSignature = tempDir.resolve("file.txt.asc")
-                signFile(fileToSign,
-                         GpgPrivateKey(testerPrivateKey),
-                         GpgPassphrase("password123"))
-//                fileToSign.writeText("Hello, GPG")
-//                println("Signing...")
-//                it.signFile(fileToSign, GpgPassphrase("password123"))
-                expectedSignature.readText().trim()
-                    .startsWith("-----BEGIN PGP SIGNATURE-----")
-                    .shouldBeTrue()
-//                println("Signed")
-            } finally {
-                require(tempDir.toString().contains("temp"))
-                tempDir.toFile().deleteRecursively()
+                it.importKey(GpgPrivateKey(testerPrivateKey))
+                it.signFile(fileToSign, GpgPassphrase(testPassphrase))
+                expectedSignature.isSignatureFile().shouldBeTrue()
+                //println(expectedSignature.readText())
+
+                // К одному и тому же файлу всегда генерируются разные подписи.
+                // Как убедиться, что GPG вообще подписывает наши файлы нашими подписями?
+                //
+                // Проверяем, что функция верификации признаёт ранее сгенерированную подпись
+                // соответствующей файлу:
+                val predefinedSignature = tempDir/"predefined.asc"
+                predefinedSignature.writeText(testSignatureForSmiley)
+                it.verifyFile(fileToSign, signature = predefinedSignature)
+                    .shouldBe("1292 EC42 6424 C9BA 0A58 1EE0 60C9 94FD CD3C ADBD")
+
+                // Проверяем, что новая сгенерированная сигнатура тоже соответствует:
+                it.verifyFile(
+                    file = fileToSign,
+                    signature = expectedSignature
+                ).shouldBe("1292 EC42 6424 C9BA 0A58 1EE0 60C9 94FD CD3C ADBD")
             }
+        } finally {
+            require(tempDir.toString().contains("temp"))
+            tempDir.toFile().deleteRecursively()
+        }
+    }
 
+    @Test
+    fun signSampleFile() = runBlocking {
+        // это хорошо, что путь к файлу относительный: проверяем заодно, что GPG корректно
+        // воспринимает рабочий каталог
+        val fileToSign = Paths.get("src/test/data/gpgSamples/precise-0.1.0-dev23.jar")
+        val tempDir = createTempDirectory("temp")
+        try {
+            TempGpg().use {
+                val expectedSignature = tempDir / "signature.asc"
+                it.importKey(GpgPrivateKey(testerPrivateKey))
+                it.signFile(fileToSign, GpgPassphrase(testPassphrase), expectedSignature)
+                expectedSignature.isSignatureFile().shouldBeTrue()
 
+                it.verifyFile(
+                    file = fileToSign,
+                    signature = expectedSignature
+                ).shouldBe("1292 EC42 6424 C9BA 0A58 1EE0 60C9 94FD CD3C ADBD")
 
-//        TempGpg().use {
-//            it.importKey(GpgPrivateKey(testerPrivateKey))
-//
-//            val tempDir = createTempDirectory("temp")
-//            try {
-//                val fileToSign = tempDir.resolve("file.txt")
-//                val expectedSignature = tempDir.resolve("file.txt.asc")
-//                fileToSign.writeText("Hello, GPG")
-//                println("Signing...")
-//                it.signFile(fileToSign, GpgPassphrase("password123"))
-//                expectedSignature.readText().trim()
-//                    .startsWith("-----BEGIN PGP SIGNATURE-----")
-//                    .shouldBeTrue()
-//                println("Signed")
-//            } finally {
-//                require(tempDir.toString().contains("temp"))
-//                tempDir.toFile().deleteRecursively()
-//            }
-//        }
+                // сопоставляем также с сигнатурой-константой
+                it.verifyFile(
+                    file = fileToSign,
+                    signature = Paths.get(
+                        "src/test/data/gpgSamples/precise-0.1.0-dev23.correct.asc")
+                ).shouldBe("1292 EC42 6424 C9BA 0A58 1EE0 60C9 94FD CD3C ADBD")
+            }
+        } finally {
+            require(tempDir.toString().contains("temp"))
+            tempDir.toFile().deleteRecursively()
+        }
     }
 }

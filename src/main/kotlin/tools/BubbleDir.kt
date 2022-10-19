@@ -17,11 +17,13 @@ class BubbleDir(val path: Path) : Closeable {
     }
 
     companion object {
+        // этот каталог и по умолчанию создаётся с правами достаточно секьюрными для GPG
+        // (переключать в 700 не нужно)
         fun createJustDir() = createTempDirectory(
             "tmp",
-            PosixFilePermissions.asFileAttribute(
-                PosixFilePermissions.fromString("rwx------")
-            )
+//            PosixFilePermissions.asFileAttribute(
+//                PosixFilePermissions.fromString("rwx------")
+//            )
         )
 
         fun justDelete(p: Path) {
