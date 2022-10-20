@@ -62,5 +62,8 @@ open class UnsignedMavenFileset(val files: List<Path>) {
                         { files.single { it.name.endsWith(".pom") } })
 
 
-    val notation by lazy { PomXml(pomFile.readText()).notation() }
+    val notation by lazy {
+        rethrowingState({ "Failed to extract the group:artifact:version from the POM file." },
+                        {PomXml(pomFile.readText()).notation()})
+    }
 }

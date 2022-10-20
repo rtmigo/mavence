@@ -164,7 +164,7 @@ java -jar mavence.jar stage io.github.doe:mylib
 - If the Sonatype server responds, it does not mean that it is working
 
 - If sending a package to Staging fails for any reason, consider that the
-  problem is on your end. Meditate more often and edit meta-data
+  problem is on your end. Meditate more and try to edit meta-data
 
 ## License
 
