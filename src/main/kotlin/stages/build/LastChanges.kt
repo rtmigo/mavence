@@ -19,9 +19,6 @@ private fun listMavenMetadataLocals(): Sequence<MetadataLocalXmlFile> {
         .map { MetadataLocalXmlFile(it.absoluteFile.toPath()) }
 }
 
-
-
-
 @JvmInline
 value class MavenArtifactDir(val path: Path) {
     init {
@@ -52,11 +49,18 @@ fun MavenArtifactDir.asUnsignedFileset() = UnsignedMavenFileset(
 )
 
 open class UnsignedMavenFileset(val files: List<Path>) {
-    val pomFile = files.single { it.name.endsWith(".pom") }
+
+    init {
+        rethrowingState({ "Single '*-javadoc.jar' not found in $files." },
+                        { files.single { it.name.endsWith("-javadoc.jar") } })
+        rethrowingState({ "Single '*-sources.jar' not found in $files." },
+                        { files.single { it.name.endsWith("-sources.jar") } })
+    }
+
+    val pomFile =
+        rethrowingState({ "Cannot find POM file in $files" },
+                        { files.single { it.name.endsWith(".pom") } })
+
+
     val notation by lazy { PomXml(pomFile.readText()).notation() }
 }
-
-
-
-
-

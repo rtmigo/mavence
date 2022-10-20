@@ -17,12 +17,12 @@ These tasks are almost unrelated.
 By placing publishing logic in a build script, you make the foundation of the
 project shaky.
 
-The build script gets big and ugly, especially if it's supposed to work in
-CI/CD. Gradle itself is a monster of complexity. Feeding the monster with
-excessive tasks is the last thing to do.
+It's very easy to make a Gradle script big and ugly. Especially if
+it's supposed to work in CI/CD. Gradle itself is a monster of complexity.
+Feeding the monster with excessive tasks is the last thing to do.
 
-However, we still use one of the plugins. This is the Gradle `maven-publish`,
-that creates a local copy of a Maven project.
+However, we still use some Gradle plugins. This is the Gradle `maven-publish`,
+that creates, i.e. builds a local copy of a Maven package.
 
 </details>
 
