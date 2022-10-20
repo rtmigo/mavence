@@ -30,7 +30,7 @@ from the [releases page](https://github.com/rtmigo/mavence/releases).
 
 Run with
 
-```bash
+```
 java -jar mavence.jar
 ```
 
@@ -198,9 +198,9 @@ return a "server error" code, or accept the package but silently ignore it.
 Set environment variables `MAVEN_GPG_KEY`, `MAVEN_GPG_PASSWORD`
 , `SONATYPE_USERNAME`, `SONATYPE_PASSWORD` and run:
 
-```bash
+```
 cd /path/to/thelib
-java -jar mavence.jar central io.github.doe:thelib 
+java -jar mavence.jar central my.domain:thelib 
 ```
 
 This single command will do all the necessary work: build, signing, staging
@@ -212,9 +212,9 @@ This will place the package file inside the local `~/.m2` directory. This way
 you can
 test the package without sending it anywhere.
 
-```bash
+```
 cd /path/to/thelib
-java -jar mavence.jar local io.github.doe:thelib 
+java -jar mavence.jar local my.domain:thelib 
 ```
 
 ### Publish to Staging
@@ -222,9 +222,9 @@ java -jar mavence.jar local io.github.doe:thelib
 Set environment variables `MAVEN_GPG_KEY`, `MAVEN_GPG_PASSWORD`
 , `SONATYPE_USERNAME`, `SONATYPE_PASSWORD` and run:
 
-```bash
+```
 cd /path/to/thelib
-java -jar mavence.jar stage io.github.doe:thelib 
+java -jar mavence.jar stage my.domain:thelib 
 ```
 
 This will push the package to
@@ -239,7 +239,7 @@ prints the result as JSON.
 
 Bash:
 
-```bash
+```
 JSON=$(java -jar mavence.jar local my.domain:thelib)
 
 echo $JSON
