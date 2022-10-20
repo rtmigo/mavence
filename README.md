@@ -41,27 +41,11 @@ variables:
 
 | variable             | wtf                                                       |
 |----------------------|-----------------------------------------------------------|
-| `SONATYPE_USERNAME`  | Username for Sonatype JIRA (optionally replaced by token) |
-| `SONATYPE_PASSWORD`  | Password for Sonatype JIRA (optionally replaced by token) |
 | `MAVEN_GPG_KEY`      | Locally generated private key in ASCII armor              |  
 | `MAVEN_GPG_PASSWORD` | Password protecting the private key                       |
+| `SONATYPE_USERNAME`  | Username for Sonatype JIRA (optionally replaced by token) |
+| `SONATYPE_PASSWORD`  | Password for Sonatype JIRA (optionally replaced by token) |
 
-<details><summary>Where to get Sonatype variables</summary>
-
-You need
-to [register](https://getstream.io/blog/publishing-libraries-to-mavencentral-2021/#registering-a-sonatype-account)
-on the [Sonatype Jira](https://issues.sonatype.org/secure/Dashboard.jspa)
-and chat with bots, until they **verify** that you can publish a package.
-That gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
-publishing.
-
-If you have enough nerve for one more step, you
-can [generate tokens](https://central.sonatype.org/publish/manage-user/#generate-token-on-nxrm-servers).
-The tokens also can be placed in the `SONATYPE_USERNAME` and `SONATYPE_PASSWORD`. In some circumstances it is safer. 
-
-
-
-</details>
 <details><summary>Where to get GPG variables</summary>
 
 ### Generate key
@@ -135,6 +119,23 @@ $ gpg --keyserver hkps://keys.openpgp.org --send-keys 1292EC426424C9BA0A581EE060
 Some servers will just store the key. Some may require prior email verification.
 Some servers disappear. You have to choose the right one for the moment.
 
+
+
+
+</details>
+
+<details><summary>Where to get Sonatype variables</summary>
+
+You need
+to [register](https://getstream.io/blog/publishing-libraries-to-mavencentral-2021/#registering-a-sonatype-account)
+on the [Sonatype Jira](https://issues.sonatype.org/secure/Dashboard.jspa)
+and chat with bots, until they **verify** that you can publish a package.
+That gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
+publishing.
+
+If you have enough nerve for one more step, you
+can [generate tokens](https://central.sonatype.org/publish/manage-user/#generate-token-on-nxrm-servers).
+The tokens also can be placed in the `SONATYPE_USERNAME` and `SONATYPE_PASSWORD`. In some circumstances it is safer.
 
 
 
