@@ -24,15 +24,32 @@ builds a local copy of the Maven package.
 
 ## Install and run
 
-Just get the
-latest [mavence.jar](https://github.com/rtmigo/mavence/releases/latest/download/mavence.jar)
-from the [releases page](https://github.com/rtmigo/mavence/releases).
+### Command line
 
-Run with
+```
+wget https://github.com/rtmigo/mavence/releases/latest/download/mavence.jar
+```
+
+Run:
 
 ```
 java -jar mavence.jar
 ```
+
+
+### Manually
+
+Just get the
+latest [mavence.jar](https://github.com/rtmigo/mavence/releases/latest/download/mavence.jar)
+from the [releases page](https://github.com/rtmigo/mavence/releases).
+
+Run:
+
+```
+java -jar ~/Downloads/mavence.jar
+```
+
+
 
 ## Setting the environment
 
