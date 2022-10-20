@@ -100,7 +100,7 @@ Q05nuVbGJvHqv6jF1+zRNMIEKS/Ioa1C4jenEe0j3boGM2IgjHtPq7WuOeSR2ErX
 -----END PGP PRIVATE KEY BLOCK-----
 ```
 
-Or put it to environment variable (Bash):
+Or put it directly to `MAVEN_GPG_KEY` environment variable (Bash):
 
 ```bash
 $ MAVEN_GPG_KEY=$(gpg --export-secret-keys --armor 1292EC426424C9BA0A581EE060C994FDCD3CADBD)
