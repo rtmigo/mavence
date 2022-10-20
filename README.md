@@ -125,7 +125,7 @@ java -jar mavence.jar stage io.github.doe:mylib
 # Keep in mind
 
 - Sonatype servers may not respond. If you see a lot of timeout errors, 
-  it is ok, just postpone work until tomorrow or learn Rust
+  it is ok. Postpone work until tomorrow or learn Rust
 
 - If the Sonatype server responds, it does not mean that it is working
 

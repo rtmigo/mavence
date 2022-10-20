@@ -33,10 +33,11 @@ fun createClient(user: SonatypeUsername, pass: SonatypePassword): HttpClient =
         install(HttpRequestRetry) {
             retryOnServerErrors(maxRetries = 10)
             exponentialDelay()
+            retryOnException(maxRetries = 10) // HttpTimeout выбрасывает исключения
         }
 
         install(HttpTimeout) {
-            this.requestTimeoutMillis = 10*1000
+            this.requestTimeoutMillis = 10*60*1000
             this.connectTimeoutMillis = 5*1000
             this.socketTimeoutMillis = this.connectTimeoutMillis
         }
