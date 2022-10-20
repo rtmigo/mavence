@@ -3,6 +3,7 @@ package stages.upload
 import MavenUrl
 
 import io.ktor.client.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.logging.*
@@ -29,18 +30,27 @@ private fun insecureHttpLogging() = System.getenv("INSECURE_HTTP_LOGGING") == "1
 fun createClient(user: SonatypeUsername, pass: SonatypePassword): HttpClient =
     HttpClient {
 
-        if (System.getenv("HTTP_LOGGING") == "1") {
-            install(Logging) {
-                logger = object : Logger {
-                    override fun log(message: String) {
-                        eprint("# ktor ###\n$message\n# /ktor ##")
-                    }
+        install(HttpRequestRetry) {
+            retryOnServerErrors(maxRetries = 10)
+            exponentialDelay()
+        }
+
+        install(HttpTimeout) {
+            this.requestTimeoutMillis = 10*1000
+            this.connectTimeoutMillis = 5*1000
+            this.socketTimeoutMillis = this.connectTimeoutMillis
+        }
+
+        install(Logging) {
+            logger = object : Logger {
+                override fun log(message: String) {
+                    eprint("# ktor ###\n$message\n# /ktor ##")
                 }
-                level = if (insecureHttpLogging())
-                    LogLevel.HEADERS
-                else
-                    LogLevel.INFO // avoid exposing credentials in public logs
             }
+            level = if (insecureHttpLogging())
+                LogLevel.HEADERS
+            else
+                LogLevel.INFO // avoid exposing credentials in public logs
         }
 
         install(Auth) {

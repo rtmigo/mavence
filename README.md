@@ -98,7 +98,8 @@ and release.
 
 ### Publish to Maven Local
 
-This will "publish" the package to a local directory `~/.m2`. This way you can
+This will place the package file inside the local `~/.m2` directory. This way
+you can
 test the package without sending it anywhere.
 
 ```bash
@@ -108,7 +109,9 @@ java -jar mavence.jar local io.github.doe:mylib
 
 ### Publish to Staging
 
-This will push the package to a [temporary remote repository](https://s01.oss.sonatype.org/content/repositories/). This way you can
+This will push the package to
+a [temporary remote repository](https://s01.oss.sonatype.org/content/repositories/)
+. This way you can
 test the package without sending it to Central.
 
 Set environment variables `MAVEN_GPG_KEY`, `MAVEN_GPG_PASSWORD`
@@ -119,7 +122,15 @@ cd /path/to/mylib
 java -jar mavence.jar stage io.github.doe:mylib 
 ```
 
-## License
+# Keep in mind
+
+- Sonatype servers may not respond. If you see a lot of timeout errors, 
+  it is ok, just postpone work until tomorrow or learn Rust
+
+- If the Sonatype server responds, it does not mean that it is working
+
+- If sending a package to Staging fails, consider that the problem is on 
+  your end. Try to be a better balanced person and edit the meta data
 
 ## License
 
