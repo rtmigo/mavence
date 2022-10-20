@@ -49,7 +49,7 @@ suspend fun cmdLocal(ga: GroupArtifact, isFinal: Boolean = false): MavenArtifact
                     version = nota.version.string,
                     artifact = nota.artifact.string,
                     notation = nota.toString(),
-                    mavenRepo = "file://$m2str"
+                    mavenRepo = mavenLocalUrl.toASCIIString() //"file://$m2str"
                 )
             ))
     }

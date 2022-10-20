@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "io.github.rtmigo"
-version = "0.1.2-SNAPSHOT"
+version = "0.1.2" // -SNAPSHOT
 
 repositories {
     mavenCentral()
@@ -22,7 +22,7 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0") // testing
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0") // testing
-    testImplementation("io.kotest:kotest-assertions-core:5.5.1")// testing
+    testImplementation("io.kotest:kotest-assertions-core:5.5.1") // testing
 
     implementation("com.github.pgreze:kotlin-process:1.4") // running processes
     implementation("com.github.aballano:mnemonik:2.1.1") // caching function results
