@@ -8,8 +8,10 @@ import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.*
 import kotlinx.coroutines.runBlocking
 import maven.*
+import stages.build.*
 import stages.sign.*
 import stages.upload.*
+import java.nio.file.*
 
 
 class Cli : NoOpCliktCommand(
@@ -27,12 +29,19 @@ class Cli : NoOpCliktCommand(
     override fun run() = Unit
 }
 
+private suspend fun gaa(): GroupArtifact {
+    val ad = ArtifactDir(Paths.get("."))
+    return GroupArtifact(ad.group(), ad.artifact())
+}
 
 open class Local(help: String="Build, publish to $m2str") : CliktCommand(help = help) {
-    val groupAndArtifact by argument("<artifact>")
+    //val groupAndArtifact by argument("<artifact>")
 
     override fun run() = runBlocking {
-        cmdLocal(GroupArtifact.parse(groupAndArtifact), isFinal = true)
+        //val gw = Paths.get(".").toGradlew()
+        //gw.
+        //val ad = ArtifactDir(Paths.get("."))
+        cmdLocal(gaa(), isFinal = true)
         Unit
     }
 }
@@ -51,7 +60,7 @@ open class Stage(help: String = "Build, sign, publish to OSSRH Staging") :
 
     override fun run() = runBlocking {
         cmdSign(
-            cmdLocal(GroupArtifact.parse(this@Stage.groupAndArtifact)),
+            cmdLocal(gaa()),
             key = GpgPrivateKey(gpgKey),
             pass = GpgPassphrase(gpgPwd)
         ).use {
@@ -67,7 +76,7 @@ open class Stage(help: String = "Build, sign, publish to OSSRH Staging") :
 class Central : Stage(help = "Build, sign, publish to OSSRH Staging, release to Central") {
     override fun run() = runBlocking {
         cmdSign(
-            cmdLocal(GroupArtifact.parse(groupAndArtifact)),
+            cmdLocal(gaa()),
             key = GpgPrivateKey(gpgKey),
             pass = GpgPassphrase(gpgPwd)
         ).use { signed ->

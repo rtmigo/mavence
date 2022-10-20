@@ -11,12 +11,12 @@ import ExpectedException
 import GradlewFile
 
 
-
 import ProjectRootDir
 import com.aballano.mnemonik.memoizeSuspend
 import com.github.pgreze.process.*
 
 import maven.*
+import tools.rethrowingState
 import java.nio.file.*
 import kotlin.io.path.absolute
 import kotlin.io.path.exists
@@ -57,7 +57,7 @@ suspend fun ArtifactDir.gradleClean() {
     check(result.resultCode == 0)
 }
 
-suspend fun GradlewFile.getVersion(): String {
+suspend fun GradlewFile.getGradleVersion(): String {
     val res = process(
         this.path.toString(), "--version",
         stdout = Redirect.CAPTURE
@@ -71,8 +71,8 @@ suspend fun GradlewFile.getVersion(): String {
         }
 }
 
-suspend fun GradlewFile.setVersion(newVersion: String) {
-    val oldVersion = this.getVersion()
+suspend fun GradlewFile.setGradleVersion(newVersion: String) {
+    val oldVersion = this.getGradleVersion()
     if (oldVersion == newVersion) {
         println("Current version is $oldVersion. No need to change.")
         return
@@ -85,7 +85,7 @@ suspend fun GradlewFile.setVersion(newVersion: String) {
     )
         .also { check(it.resultCode == 0) }
 
-    check(this.getVersion() == newVersion) { "Failed to change version" }
+    check(this.getGradleVersion() == newVersion) { "Failed to change version" }
 }
 
 /// Returns all the keys that were added or removed, and also all the keys associated
@@ -94,7 +94,10 @@ internal fun <K, V> keysOfChanges(old: Map<K, V>, new: Map<K, V>): List<K> =
     (old.keys + new.keys).filter { (old[it] ?: 0) != (new[it] ?: 0) }
 
 
-suspend fun GradlewFile.publishAndDetect(ga: GroupArtifact, publicationName: String?): MetadataLocalXmlFile {
+suspend fun GradlewFile.publishAndDetect(
+    ga: GroupArtifact,
+    publicationName: String?
+): MetadataLocalXmlFile {
     //val old = readUpdateTimes()
     fun xml() = ga.expectedLocalXmlFile(ga)
 
@@ -111,7 +114,8 @@ suspend fun GradlewFile.publishAndDetect(ga: GroupArtifact, publicationName: Str
 
     check(newXml.file.exists()) { "File '${newXml.file} not found'" }
     check(newXml.lastUpdated != oldLastUpdated) {
-        "'lastUpdated' value was not changed in ${newXml.file}"}
+        "'lastUpdated' value was not changed in ${newXml.file}"
+    }
 
     return newXml
     //val new = readUpdateTimes()
@@ -193,8 +197,15 @@ private suspend fun gradleProperties(d: ArtifactDir): Map<String, String> =
 private val cachedProperties = ::gradleProperties.memoizeSuspend()
 
 suspend fun ArtifactDir.gradleVersion() = cachedProperties(this)["version"]!!
-suspend fun ArtifactDir.group() = Group(cachedProperties(this)["group"]!!)
-suspend fun ArtifactDir.artifact() = Group(cachedProperties(this)["archivesBaseName"]!!)
+
+suspend fun ArtifactDir.group(): Group = rethrowingState(
+    { "Failed to detect the package Group in ${this.path}" },
+    { Group(cachedProperties(this)["group"]!!) })
+
+suspend fun ArtifactDir.artifact(): Artifact = rethrowingState(
+    { "Failed to detect the Artifact in ${this.path}" },
+    { Artifact(cachedProperties(this)["archivesBaseName"]!!) })
+
 
 data class Dependency(val notation: Notation, val scope: String)
 
