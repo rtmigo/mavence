@@ -93,9 +93,10 @@ jobs:
         run: python src/test/python/test_uber.py
 
   version-test:
+    # prevents pushing newer code with an already published version
     runs-on: ubuntu-latest
     steps:
-    # prevents pushing newer code with an already published version
+    - uses: actions/checkout@master
     - name: Setup JDK
       uses: actions/setup-java@master
       with:
