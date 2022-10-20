@@ -150,7 +150,7 @@ version = "0.1.2"
 
 <details><summary>Artifact</summary>
 
-It is the second part of `my.domain:thelib:1.0.0`, i.e. `thelib`.
+It is the second part of `my.domain:thelib:0.1.2`, i.e. `thelib`.
 
 `mavence` takes it
 from [archivesBaseName](https://docs.gradle.org/current/dsl/org.gradle.api.Project.html#org.gradle.api.Project:archivesBaseName)
