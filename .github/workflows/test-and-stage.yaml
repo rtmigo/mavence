@@ -28,7 +28,7 @@ jobs:
         ]
         jdk-version: [
           8,
-          # 18
+          18
         ]
         gradle-version: [
           '7.5.1',
