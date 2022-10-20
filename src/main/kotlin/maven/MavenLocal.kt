@@ -6,11 +6,16 @@
 package maven
 
 import org.jsoup.Jsoup
+import java.net.URI
 import java.nio.file.*
 import kotlin.io.path.*
 
 val m2: Path = Paths.get(System.getProperty("user.home") + "/.m2")
 val m2str = m2.toString()
+
+val mavenLocalUrl: URI by lazy {
+    URI("file://"+m2.resolve("repository").toString())
+}
 
 
 data class MetadataLocalXmlFile(val file: Path) {

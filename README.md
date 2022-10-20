@@ -347,7 +347,7 @@ Output:
   "artifact": "thelib",
   "version": "0.1.2",
   "notation": "my.domain:thelib:0.1.2",
-  "mavenRepo": "file:///home/doe/.m2"
+  "mavenRepo": "file:///home/doe/.m2/repository"
 }
 ```
 

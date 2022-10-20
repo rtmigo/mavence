@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
         self.assertEqual(js["group"], 'io.github.rtmigo')
         self.assertEqual(js["artifact"], 'libr')
         self.assertTrue(js["mavenRepo"].startswith('file://'))
-        self.assertTrue(js["mavenRepo"].endswith('/.m2'))
+        self.assertTrue(js["mavenRepo"].endswith('/.m2/repository'))
         self.assertEqual(js["notation"], 'io.github.rtmigo:libr:1.2.3-rc2')
 
 
