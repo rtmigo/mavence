@@ -17,7 +17,8 @@ class Test(unittest.TestCase):
         js = json.loads(stdout)
         self.assertEqual(js["group"], 'io.github.rtmigo')
         self.assertEqual(js["artifact"], 'libr')
-        self.assertEqual(js["mavenUrl"], 'file:///home/rtmigo/.m2')
+        self.assertTrue(js["mavenUrl"].startswith('file://'))
+        self.assertTrue(js["mavenUrl"].endswith('/.m2'))
         self.assertEqual(js["notation"], 'io.github.rtmigo:libr:1.2.3-rc2')
 
         print(js)
