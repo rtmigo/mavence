@@ -90,10 +90,33 @@ jobs:
       - name: Build uber jar
         run: ./gradlew uberJar
       - name: Run tests
-        run: python src/test/python/test_uber.py        
+        run: python src/test/python/test_uber.py
+
+  version-test:
+    needs: [ unit-test, python-test ]
+    runs-on: ubuntu-latest
+    steps:
+    # prevents pushing newer code with an already published version
+    - name: Setup JDK
+      uses: actions/setup-java@master
+      with:
+        java-version: 17
+        distribution: 'temurin'
+        cache: gradle
+    - name: Get the project version
+      id: get_version
+      run: |
+        git fetch --all --tags
+        VERSION=$(./gradlew properties | grep version | awk '{print $2}')
+        echo "Version $VERSION"
+        
+        [[ -z $(git tag -l $VERSION) ]] # check this version was not published  
+        
+        echo "result=$VERSION" >>$GITHUB_OUTPUT
+
 
   to-staging:
-    needs: [unit-test, python-test]
+    needs: [unit-test, python-test, version-test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
