@@ -15,20 +15,17 @@ the [Signing](https://docs.gradle.org/current/userguide/signing_plugin.html) and
 These tasks are almost unrelated.
 
 By placing publishing logic in a build script, you make the foundation of the
-project shaky.
+project complex, big and ugly.
 
-It's very easy to make a Gradle script big and ugly. Especially if
-it's supposed to work in CI/CD. Gradle itself is a monster of complexity.
-Feeding the monster with excessive tasks is the last thing to do.
-
-However, we still use some Gradle plugins. This is the Gradle `maven-publish`,
-that creates, i.e. builds a local copy of a Maven package.
+However, we still use some Gradle plugins. The `maven-publish` creates, i.e.
+builds a local copy of the Maven package.
 
 </details>
 
 ## Install and run
 
-Just get the latest [mavence.jar](https://github.com/rtmigo/mavence/releases/latest/download/mavence.jar) 
+Just get the
+latest [mavence.jar](https://github.com/rtmigo/mavence/releases/latest/download/mavence.jar)
 from the [releases page](https://github.com/rtmigo/mavence/releases).
 
 Run with
@@ -49,21 +46,25 @@ variables:
 | `MAVEN_GPG_KEY`      | Locally generated private key in ASCII armor              |  
 | `MAVEN_GPG_PASSWORD` | Password protecting the private key                       |
 
-<details><summary>Here how to get them</summary>
+<details><summary>Here where to get them</summary>
 
-1. You need to register on the Sonatype site and chat with bots in
-   their JIRA system, until they **verify** that you can publish a package. That
-   gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
+There is no document in the universe yet that would describe the process in
+detail, but without imposing too much. So prepare to a dull journey to the dusty
+circles of hell.
+
+1. You need to [register](https://getstream.io/blog/publishing-libraries-to-mavencentral-2021/#registering-a-sonatype-account)
+   on the [Sonatype Jira](https://issues.sonatype.org/secure/Dashboard.jspa)
+   and chat with bots, until they **verify** that you can publish a package.
+   That gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
    publishing.
 
 2. You generate GPG keys in your own terminal. At that point, they are just
    files. It remains to figure out what are **public**, **private** keys and
-   what is a **password**. The public key must be sent to a keyserver, and the
-   private and password must be exported to variables `MAVEN_GPG_KEY`
+   what is a **password**. The public key must be sent 
+   to [a keyserver](https://unix.stackexchange.com/a/692097), and the
+   private and password are to be exported to variables `MAVEN_GPG_KEY`
    and `MAVEN_GPG_PASSWORD`.
 
-I can't go into more detail as releasing to Maven Central
-should be your own hero's journey into the unknown and chilling.
 </details>
 
 ## Minimal configuration
@@ -129,7 +130,6 @@ rootProject.name = "thelib"
 ### Package name
 
 The published package will have a version like `my.domain:thelib:0.1.2`.
-All components of this notation are defined by Gradle scripts.
 
 <details><summary>Group and Version</summary>
 
@@ -183,6 +183,11 @@ myrootproject/
 
 </details>
 
+## Keep in mind
+
+If sending a package fails for any reason, try to edit meta-data.
+Sonatype servers do not return meaningful error responses. They can simply
+return a "server error" code, or accept the package but silently ignore it.
 
 ## Publishing
 
@@ -221,38 +226,39 @@ java -jar mavence.jar stage io.github.doe:thelib
 ```
 
 This will push the package to
-a [temporary remote repository](https://s01.oss.sonatype.org/content/repositories/).
+a [temporary remote repository](https://s01.oss.sonatype.org/content/repositories/)
+.
 This way you can test the package without sending it to Central.
 
 ## Testing before publishing
 
-Although the utility prints quite a lot, `stdout` remains clean and only 
+Although the utility prints quite a lot, `stdout` remains clean and only
 prints the result as JSON.
 
-Bash: 
+Bash:
+
 ```bash
 JSON=$(java -jar mavence.jar local my.domain:thelib)
 
 echo $JSON
 ```
+
 Output:
+
 ```json
-{ "group": "my.domain",
+{
+  "group": "my.domain",
   "artifact": "thelib",
   "version": "0.1.2",
   "notation": "my.domain:thelib:0.1.2",
-  "mavenRepo": "file:///home/doe/.m2" }
+  "mavenRepo": "file:///home/doe/.m2"
+}
 ```
 
 Using this data, you can test the package before it is sent.
 
-I usually use Python and [tempground](https://pypi.org/project/tempground/) for such testing.
-
-## Keep in mind
-
-If sending a package to Staging fails for any reason, try to edit meta-data.
-Sonatype servers do not return meaningful error responses. They can simply 
-return a "server error" code, or accept the package but silently ignore it.
+I usually use Python and [tempground](https://pypi.org/project/tempground/) for
+such testing.
 
 ## License
 
