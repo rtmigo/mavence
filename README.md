@@ -122,7 +122,7 @@ cd /path/to/mylib
 java -jar mavence.jar stage io.github.doe:mylib 
 ```
 
-# Keep in mind
+## Keep in mind
 
 - Sonatype servers may not respond. If you see a lot of timeout errors, 
   it is ok. Postpone work until tomorrow or learn Rust
@@ -130,7 +130,7 @@ java -jar mavence.jar stage io.github.doe:mylib
 - If the Sonatype server responds, it does not mean that it is working
 
 - If sending a package to Staging fails, consider that the problem is on 
-  your end. Try to be a better balanced person and edit the meta data
+  your end. Meditate more often and edit meta-data
 
 ## License
 
