@@ -46,25 +46,86 @@ variables:
 | `MAVEN_GPG_KEY`      | Locally generated private key in ASCII armor              |  
 | `MAVEN_GPG_PASSWORD` | Password protecting the private key                       |
 
-<details><summary>Here where to get them</summary>
+<details><summary>Where to get Sonatype variables</summary>
 
-There is no document in the universe yet that would describe the process in
-detail, but without imposing too much. So prepare to a dull journey to the dusty
-circles of hell.
+You need
+to [register](https://getstream.io/blog/publishing-libraries-to-mavencentral-2021/#registering-a-sonatype-account)
+on the [Sonatype Jira](https://issues.sonatype.org/secure/Dashboard.jspa)
+and chat with bots, until they **verify** that you can publish a package.
+That gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
+publishing.
 
-1. You need
-   to [register](https://getstream.io/blog/publishing-libraries-to-mavencentral-2021/#registering-a-sonatype-account)
-   on the [Sonatype Jira](https://issues.sonatype.org/secure/Dashboard.jspa)
-   and chat with bots, until they **verify** that you can publish a package.
-   That gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
-   publishing.
 
-2. You generate GPG keys in your own terminal. At that point, they are just
-   files. It remains to figure out what are **public**, **private** keys and
-   what is a **password**. The public key must be sent
-   to [a keyserver](https://unix.stackexchange.com/a/692097), and the
-   private and password are to be exported to variables `MAVEN_GPG_KEY`
-   and `MAVEN_GPG_PASSWORD`.
+
+</details>
+<details><summary>Where to get GPG variables</summary>
+
+### Generate key
+
+```bash
+$ gpg --gen-key
+```
+
+`gpg` will interactively prompt you to choose a password for the new key. It is
+this password that should later be placed in the variable `MAVEN_GPG_PASSWORD`.
+
+### See your private key (get `MAVEN_GPG_KEY`)
+
+```bash
+$ gpg --list-keys
+```
+
+```
+pub   rsa3072 2022-10-18 [SC]
+      1292EC426424C9BA0A581EE060C994FDCD3CADBD       << this is the ID
+uid           [ultimate] John Doe <doe@example.com>
+sub   rsa3072 2022-10-18 [E]
+```
+
+
+```bash
+$ gpg --export-secret-keys --armor 1292EC426424C9BA0A581EE060C994FDCD3CADBD
+```
+
+```
+-----BEGIN PGP PRIVATE KEY BLOCK-----
+
+lQWGBGNOko0BDACzxxMh4EwjlOBRuV94reQglPp5Chzdw4yJHKBYffGGCy27nmde
+Q05nuVbGJvHqv6jF1+zRNMIEKS/Ioa1C4jenEe0j3boGM2IgjHtPq7WuOeSR2ErX
+...
+
+-----END PGP PRIVATE KEY BLOCK-----
+```
+
+Or put it to environment variable (Bash):
+
+```bash
+$ MAVEN_GPG_KEY=$(gpg --export-secret-keys --armor 1292EC426424C9BA0A581EE060C994FDCD3CADBD)
+
+$ export MAVEN_GPG_KEY 
+```
+
+### Send the public key to [a keyserver](https://unix.stackexchange.com/a/692097)
+
+```bash
+$ gpg --list-keys
+```
+
+```
+pub   rsa3072 2022-10-18 [SC]
+      1292EC426424C9BA0A581EE060C994FDCD3CADBD       << this is the ID
+uid           [ultimate] John Doe <doe@example.com>
+sub   rsa3072 2022-10-18 [E]
+```
+
+
+```bash
+$ gpg --keyserver hkps://keys.openpgp.org --send-keys 1292EC426424C9BA0A581EE060C994FDCD3CADBD
+```
+
+Some servers will just store the key. Some may require prior email verification.
+Some servers disappear. You have to choose the right one for the moment.
+
 
 </details>
 
