@@ -175,12 +175,12 @@ private suspend fun GradlewFile.tasks(): List<String> =
         }
 
 
-private suspend fun gradleProperties(d: ArtifactDir): Map<String, String> =
-    d.path.toGradlew().let {
+private suspend fun gradleProperties(artidir: ArtifactDir): Map<String, String> =
+    artidir.path.toGradlew().let {
         process(
             it.path.toString(),
             "-q", "properties",
-            directory = it.path.parent.toFile(),
+            directory = artidir.path.toFile(),
             stdout = Redirect.CAPTURE
         )
     }.let {

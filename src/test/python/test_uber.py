@@ -3,7 +3,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-deployable_project = Path("src/test/sample/deployable")
+deployable_project = Path("src/test/sample/deployable/libr")
 assert deployable_project.exists()
 
 
