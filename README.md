@@ -134,8 +134,10 @@ That gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
 publishing.
 
 If you have enough nerve for one more step, you
-can [generate tokens](https://central.sonatype.org/publish/manage-user/#generate-token-on-nxrm-servers).
-The tokens also can be placed in the `SONATYPE_USERNAME` and `SONATYPE_PASSWORD`. In some circumstances it is safer.
+can [generate tokens](https://central.sonatype.org/publish/manage-user/#generate-token-on-nxrm-servers)
+.
+The tokens also can be placed in the `SONATYPE_USERNAME` and `SONATYPE_PASSWORD`
+. In some circumstances it is safer.
 
 
 
@@ -260,9 +262,12 @@ myrootproject/
 
 ## Keep in mind
 
-If sending a package fails for any reason, try to edit meta-data.
-Sonatype servers do not return meaningful error responses. They can simply
-return a "server error" code, or accept the package but silently ignore it.
+Sonatype servers do not return meaningful error responses. They can return a
+generic "500 Internal Server Error" code, or accept the file, but never publish
+it as a maven package.
+
+If publishing a package fails for any reason, the problem may be in the meta data.
+Something does not match with something: package name, authors, signatures.
 
 ## Publishing
 
