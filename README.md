@@ -85,7 +85,7 @@ publishing {
                 val owner = "doe"
 
                 name.set("mylib")
-                description.set("There are works even dumber than copy-pasting")
+                description.set("There are things even dumber than copy-pasting")
                 url.set("https://github.com/$owner/$repo")
 
                 developers {
