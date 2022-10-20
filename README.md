@@ -55,12 +55,16 @@ and chat with bots, until they **verify** that you can publish a package.
 That gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
 publishing.
 
+If you have enough nerve for one more step, you
+can [generate tokens](https://central.sonatype.org/publish/manage-user/#generate-token-on-nxrm-servers).
+The tokens also can be placed in the `SONATYPE_USERNAME` and `SONATYPE_PASSWORD`. In some circumstances it is safer. 
+
 
 
 </details>
 <details><summary>Where to get GPG variables</summary>
 
-### Generate key 
+### Generate key
 
 It gives you `MAVEN_GPG_PASSWORD`.
 
@@ -71,7 +75,7 @@ $ gpg --gen-key
 `gpg` will interactively prompt you to choose a password for the new key. It is
 this password that should later be placed in the variable `MAVEN_GPG_PASSWORD`.
 
-### See your private key 
+### See your private key
 
 It gives you `MAVEN_GPG_KEY`.
 
@@ -110,7 +114,8 @@ $ export MAVEN_GPG_KEY
 
 ### Send the public key to [a keyserver](https://unix.stackexchange.com/a/692097)
 
-You won't come back to this again, but it will be important for the servers when publishing the package.
+You won't come back to this again, but it will be important for the servers when
+publishing the package.
 
 ```bash
 $ gpg --list-keys
