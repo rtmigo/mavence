@@ -64,7 +64,7 @@ jobs:
           cache: gradle
       - name: Unit tests
         run: |
-          export GPG_TTY=$(tty)
+          #export GPG_TTY=$(tty)
           ./gradlew build
           #python hap.py test ${{ matrix.gradle-version }}
         env:
