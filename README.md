@@ -60,7 +60,7 @@ publishing.
 </details>
 <details><summary>Where to get GPG variables</summary>
 
-### Generate key
+### Generate key (it gives you `MAVEN_GPG_PASSWORD`)
 
 ```bash
 $ gpg --gen-key
@@ -69,7 +69,7 @@ $ gpg --gen-key
 `gpg` will interactively prompt you to choose a password for the new key. It is
 this password that should later be placed in the variable `MAVEN_GPG_PASSWORD`.
 
-### See your private key (get `MAVEN_GPG_KEY`)
+### See your private key (it gives you `MAVEN_GPG_KEY`)
 
 ```bash
 $ gpg --list-keys
