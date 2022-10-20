@@ -105,18 +105,17 @@ jobs:
           github_token: ${{ github.token }}
 
 
-  release-flag:
-    if: contains(github.event.head_commit.message, '!!release')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-
   master-flag:
     if: contains(github.event.head_commit.message, '!!release') || contains(github.event.head_commit.message, '!!master')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
 
+  release-flag:
+    if: contains(github.event.head_commit.message, '!!release')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
 
   to-master:
     needs: [master-flag, to-staging]
