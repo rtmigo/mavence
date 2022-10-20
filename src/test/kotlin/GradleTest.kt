@@ -8,7 +8,7 @@ import java.nio.file.*
 class GradleTest {
     @Test
     fun testVersion() = runBlocking {
-        Paths.get(".").toGradlew().getVersion()[0].isDigit().shouldBeTrue()
+        Paths.get(".").toGradlew().getGradleVersion()[0].isDigit().shouldBeTrue()
     }
 
     @Test
