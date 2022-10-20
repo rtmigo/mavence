@@ -30,17 +30,17 @@ private fun insecureHttpLogging() = System.getenv("INSECURE_HTTP_LOGGING") == "1
 fun createClient(user: SonatypeUsername, pass: SonatypePassword): HttpClient =
     HttpClient {
 
-        install(HttpRequestRetry) {
-            retryOnServerErrors(maxRetries = 10)
-            exponentialDelay()
-            retryOnException(maxRetries = 10) // HttpTimeout выбрасывает исключения
-        }
-
-        install(HttpTimeout) {
-            this.requestTimeoutMillis = 10*60*1000
-            this.connectTimeoutMillis = 5*1000
-            this.socketTimeoutMillis = this.connectTimeoutMillis
-        }
+//        install(HttpRequestRetry) {
+//            retryOnServerErrors(maxRetries = 10)
+//            exponentialDelay()
+//            retryOnException(maxRetries = 10) // HttpTimeout выбрасывает исключения
+//        }
+//
+//        install(HttpTimeout) {
+//            this.requestTimeoutMillis = 10*60*1000
+//            this.connectTimeoutMillis = 5*1000
+//            this.socketTimeoutMillis = this.connectTimeoutMillis
+//        }
 
         install(Logging) {
             logger = object : Logger {

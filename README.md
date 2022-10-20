@@ -1,6 +1,6 @@
 # [mavence](https://github.com/rtmigo/mavence) # experimental
 
-CLI utility for publishing Gradle projects (Kotlin, Java, e.t.c) to Maven
+CLI utility for publishing Gradle projects (Kotlin, Java, etc.) to Maven
 Central.
 
 This essentially does the same thing as
@@ -21,8 +21,8 @@ The build script gets big and ugly, especially if it's supposed to work in
 CI/CD. Gradle itself is a monster of complexity. Feeding the monster with
 excessive tasks is the last thing to do.
 
-However, we still use one of the plugins. This is a Gradle plugin that creates a
-local copy of a Maven project.
+However, we still use one of the plugins. This is the Gradle `maven-publish`,
+that creates a local copy of a Maven project.
 
 </details>
 
@@ -153,13 +153,13 @@ java -jar mavence.jar stage io.github.doe:mylib
 
 ## Keep in mind
 
-- Sonatype servers may not respond. If you see a lot of timeout errors, 
+- Sonatype servers may not respond. If you see a lot of timeout errors,
   it is ok. Postpone work until tomorrow or learn Rust
 
 - If the Sonatype server responds, it does not mean that it is working
 
-- If sending a package to Staging fails, consider that the problem is on 
-  your end. Meditate more often and edit meta-data
+- If sending a package to Staging fails for any reason, consider that the
+  problem is on your end. Meditate more often and edit meta-data
 
 ## License
 
