@@ -52,7 +52,8 @@ There is no document in the universe yet that would describe the process in
 detail, but without imposing too much. So prepare to a dull journey to the dusty
 circles of hell.
 
-1. You need to [register](https://getstream.io/blog/publishing-libraries-to-mavencentral-2021/#registering-a-sonatype-account)
+1. You need
+   to [register](https://getstream.io/blog/publishing-libraries-to-mavencentral-2021/#registering-a-sonatype-account)
    on the [Sonatype Jira](https://issues.sonatype.org/secure/Dashboard.jspa)
    and chat with bots, until they **verify** that you can publish a package.
    That gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
@@ -60,7 +61,7 @@ circles of hell.
 
 2. You generate GPG keys in your own terminal. At that point, they are just
    files. It remains to figure out what are **public**, **private** keys and
-   what is a **password**. The public key must be sent 
+   what is a **password**. The public key must be sent
    to [a keyserver](https://unix.stackexchange.com/a/692097), and the
    private and password are to be exported to variables `MAVEN_GPG_KEY`
    and `MAVEN_GPG_PASSWORD`.
@@ -69,7 +70,8 @@ circles of hell.
 
 ## Minimal configuration
 
-We still use Gradle as a base as it makes the project compatible.
+We're using Gradle configuration to build a Maven package, but not push
+it Central. Creating in this way seems like a reasonable compromise.
 
 #### build.gradle.kts
 
