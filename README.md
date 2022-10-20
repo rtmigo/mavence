@@ -312,7 +312,7 @@ This way you can test the package without sending it to Central.
 ## Testing before publishing
 
 Although the utility prints quite a lot, `stdout` remains clean and only
-prints the result as JSON.
+receives the result as JSON.
 
 Bash:
 
