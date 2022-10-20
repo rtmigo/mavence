@@ -169,12 +169,11 @@ publishing {
         create<MavenPublication>("thelib") {
             from(components["java"])
             pom {
-                val repo = "thelib"
-                val owner = "doe"
+                val github = "https://github.com/doe/thelib"
 
-                name.set("thelib")
+                name.set("The Lib")
                 description.set("There are dumber things than copy-pasting")
-                url.set("https://github.com/$owner/$repo")
+                url.set(github)
 
                 developers {
                     developer {
@@ -183,13 +182,13 @@ publishing {
                     }
                 }
                 scm {
-                    connection.set("scm:git://github.com/$owner/$repo.git")
-                    url.set("https://github.com/$owner/$repo")
+                    connection.set(github.replace("https:", "scm:git:")+".git")
+                    url.set(github)
                 }
                 licenses {
                     license {
                         name.set("Apache 2.0 License")
-                        url.set("https://github.com/$owner/$repo/blob/HEAD/LICENSE")
+                        url.set("$github/blob/HEAD/LICENSE")
                     }
                 }
             }
