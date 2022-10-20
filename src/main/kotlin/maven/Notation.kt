@@ -52,7 +52,6 @@ data class GroupArtifact(val group: Group, val artifact: Artifact) {
 
     fun segments() = this.group.segments() + listOf(this.artifact.string)
 
-    //fun splitSlash() = "${group.splitSlash()}/${artifact.string}"
     override fun toString(): String = "${group.string}:${artifact.string}"
 }
 
