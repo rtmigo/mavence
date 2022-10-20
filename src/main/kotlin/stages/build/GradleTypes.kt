@@ -1,3 +1,8 @@
+/**
+ * SPDX-FileCopyrightText: (c) 2022 Artsiom iG (rtmigo.github.io)
+ * SPDX-License-Identifier: ISC
+ **/
+
 import java.nio.file.Path
 import kotlin.io.path.*
 

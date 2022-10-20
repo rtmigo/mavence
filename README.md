@@ -52,7 +52,7 @@ variables:
    and `MAVEN_GPG_PASSWORD`.
 
 I can't go into more detail as releasing to Maven Central
-should be your own hero's journey.
+should be your own hero's journey into the unknown and chilling.
 </details>
 
 ## Minimal configuration
