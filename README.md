@@ -73,8 +73,6 @@ We still use Gradle as a base as it makes the project compatible.
 #### build.gradle.kts
 
 ```kotlin
-
-
 plugins {
     id("java-library")
     id("maven-publish")
@@ -85,19 +83,19 @@ java {
     withJavadocJar()
 }
 
-group = "io.github.doe"
+group = "my.domain"
 version = "0.1.2"
 
 publishing {
     publications {
-        create<MavenPublication>("mylib") {
+        create<MavenPublication>("thelib") {
             from(components["java"])
             pom {
-                val repo = "mylib"
+                val repo = "thelib"
                 val owner = "doe"
 
-                name.set("mylib")
-                description.set("There are things even dumber than copy-pasting")
+                name.set("thelib")
+                description.set("There are dumber things than copy-pasting")
                 url.set("https://github.com/$owner/$repo")
 
                 developers {
@@ -125,8 +123,66 @@ publishing {
 #### settings.gradle.kts
 
 ```kotlin
-rootProject.name = "mylib"
+rootProject.name = "thelib"
 ```
+
+### Package name
+
+The published package will have a version like `my.domain:thelib:0.1.2`.
+All components of this notation are defined by Gradle scripts.
+
+<details><summary>Group and Version</summary>
+
+It is the first and third part of `my.domain:thelib:0.1.2`,
+i.e. `my.domain`
+and `0.1.2`.
+
+They can be defined in `build.gradle.kts` like that:
+
+```kotlin
+group = "my.domain"
+version = "0.1.2"
+```
+
+</details>
+
+<details><summary>Artifact</summary>
+
+It is the second part of `my.domain:thelib:1.0.0`, i.e. `thelib`.
+
+`mavence` takes it
+from [archivesBaseName](https://docs.gradle.org/current/dsl/org.gradle.api.Project.html#org.gradle.api.Project:archivesBaseName)
+Gradle property.
+
+#### If we release the root project:
+
+```
+thelib/                   <<< dir name will be the artifact name 
+    src/
+    build.gradle.kts
+    settings.gradle.kts   <<< unless redefined here
+```
+
+The redefine the root project name, add the following:
+
+```kotlin
+// settings.gradle.kts
+
+rootProject.name = "newname"
+```     
+
+#### If we release a subproject:
+
+```
+myrootproject/ 
+    thelib/               <<< dir name will be the artifact name
+        src/
+        build.gradle.kts
+    settings.gradle.kts    
+```
+
+</details>
+
 
 ## Publishing
 
@@ -136,8 +192,8 @@ Set environment variables `MAVEN_GPG_KEY`, `MAVEN_GPG_PASSWORD`
 , `SONATYPE_USERNAME`, `SONATYPE_PASSWORD` and run:
 
 ```bash
-cd /path/to/mylib
-java -jar mavence.jar central io.github.doe:mylib 
+cd /path/to/thelib
+java -jar mavence.jar central io.github.doe:thelib 
 ```
 
 This single command will do all the necessary work: build, signing, staging
@@ -150,8 +206,8 @@ you can
 test the package without sending it anywhere.
 
 ```bash
-cd /path/to/mylib
-java -jar mavence.jar local io.github.doe:mylib 
+cd /path/to/thelib
+java -jar mavence.jar local io.github.doe:thelib 
 ```
 
 ### Publish to Staging
@@ -160,8 +216,8 @@ Set environment variables `MAVEN_GPG_KEY`, `MAVEN_GPG_PASSWORD`
 , `SONATYPE_USERNAME`, `SONATYPE_PASSWORD` and run:
 
 ```bash
-cd /path/to/mylib
-java -jar mavence.jar stage io.github.doe:mylib 
+cd /path/to/thelib
+java -jar mavence.jar stage io.github.doe:thelib 
 ```
 
 This will push the package to
@@ -175,16 +231,16 @@ prints the result as JSON.
 
 Bash: 
 ```bash
-JSON=$(java -jar mavence.jar local dev.domain:artifactus)
+JSON=$(java -jar mavence.jar local my.domain:thelib)
 
 echo $JSON
 ```
 Output:
 ```json
-{ "group": "dev.domain",
-  "artifact": "artifactus",
-  "version": "1.2.3",
-  "notation": "dev.domain:artifactus:1.2.3",
+{ "group": "my.domain",
+  "artifact": "thelib",
+  "version": "0.1.2",
+  "notation": "my.domain:thelib:0.1.2",
   "mavenRepo": "file:///home/doe/.m2" }
 ```
 
@@ -194,13 +250,9 @@ I usually use Python and [tempground](https://pypi.org/project/tempground/) for 
 
 ## Keep in mind
 
-- Sonatype servers may not respond. If you see a lot of timeout errors,
-  it is ok. Postpone work until tomorrow or learn Rust
-
-- If the Sonatype server responds, it does not mean that it is working
-
-- If sending a package to Staging fails for any reason, consider that the
-  problem is on your end. Meditate more and try to edit meta-data
+If sending a package to Staging fails for any reason, try to edit meta-data.
+Sonatype servers do not return meaningful error responses. They can simply 
+return a "server error" code, or accept the package but silently ignore it.
 
 ## License
 
