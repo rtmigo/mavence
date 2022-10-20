@@ -1,4 +1,4 @@
-# [mavence](https://github.com/rtmigo/mavence) # experimental
+# [mavence](https://github.com/rtmigo/mavence) #experimental
 
 CLI utility for publishing Gradle projects (Kotlin, Java, etc.) to Maven
 Central.
@@ -262,12 +262,12 @@ myrootproject/
 
 ## Keep in mind
 
-Sonatype servers do not return meaningful error responses. They can return a
-generic "500 Internal Server Error" code, or accept the file, but never publish
-it as a maven package.
+When publishing, the servers may not return meaningful error responses. They
+often return a generic "500 Internal Server Error" code, or accept the file, but
+never publish it as a maven package.
 
-If publishing a package fails for any reason, the problem may be in the meta data.
-Something does not match with something: package name, authors, signatures.
+If publishing a package fails for any reason, the problem may be in the meta
+data. Something does not match with something: package name, authors, signatures.
 
 ## Publishing
 
