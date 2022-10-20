@@ -114,7 +114,6 @@ jobs:
         
         echo "result=$VERSION" >>$GITHUB_OUTPUT
 
-
   to-staging:
     needs: [unit-test, python-test, version-test]
     runs-on: ubuntu-latest
