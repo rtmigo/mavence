@@ -60,7 +60,9 @@ publishing.
 </details>
 <details><summary>Where to get GPG variables</summary>
 
-### Generate key (it gives you `MAVEN_GPG_PASSWORD`)
+### Generate key 
+
+It gives you `MAVEN_GPG_PASSWORD`.
 
 ```bash
 $ gpg --gen-key
@@ -69,7 +71,9 @@ $ gpg --gen-key
 `gpg` will interactively prompt you to choose a password for the new key. It is
 this password that should later be placed in the variable `MAVEN_GPG_PASSWORD`.
 
-### See your private key (it gives you `MAVEN_GPG_KEY`)
+### See your private key 
+
+It gives you `MAVEN_GPG_KEY`.
 
 ```bash
 $ gpg --list-keys
@@ -81,7 +85,6 @@ pub   rsa3072 2022-10-18 [SC]
 uid           [ultimate] John Doe <doe@example.com>
 sub   rsa3072 2022-10-18 [E]
 ```
-
 
 ```bash
 $ gpg --export-secret-keys --armor 1292EC426424C9BA0A581EE060C994FDCD3CADBD
@@ -107,6 +110,8 @@ $ export MAVEN_GPG_KEY
 
 ### Send the public key to [a keyserver](https://unix.stackexchange.com/a/692097)
 
+You won't come back to this again, but it will be important for the servers when publishing the package.
+
 ```bash
 $ gpg --list-keys
 ```
@@ -118,13 +123,14 @@ uid           [ultimate] John Doe <doe@example.com>
 sub   rsa3072 2022-10-18 [E]
 ```
 
-
 ```bash
 $ gpg --keyserver hkps://keys.openpgp.org --send-keys 1292EC426424C9BA0A581EE060C994FDCD3CADBD
 ```
 
 Some servers will just store the key. Some may require prior email verification.
 Some servers disappear. You have to choose the right one for the moment.
+
+
 
 
 </details>
