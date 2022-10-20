@@ -294,7 +294,7 @@ Set environment variables `MAVEN_GPG_KEY`, `MAVEN_GPG_PASSWORD`
 
 ```
 cd /path/to/thelib
-java -jar mavence.jar central my.domain:thelib 
+java -jar mavence.jar central
 ```
 
 This single command will do all the necessary work: build, signing, staging
@@ -308,7 +308,7 @@ test the package without sending it anywhere.
 
 ```
 cd /path/to/thelib
-java -jar mavence.jar local my.domain:thelib 
+java -jar mavence.jar local
 ```
 
 ### Publish to Staging
@@ -318,7 +318,7 @@ Set environment variables `MAVEN_GPG_KEY`, `MAVEN_GPG_PASSWORD`
 
 ```
 cd /path/to/thelib
-java -jar mavence.jar stage my.domain:thelib 
+java -jar mavence.jar stage
 ```
 
 This will push the package to
@@ -334,7 +334,7 @@ receives the result as JSON.
 Bash:
 
 ```
-JSON=$(java -jar mavence.jar local my.domain:thelib)
+JSON=$(java -jar mavence.jar local)
 
 echo $JSON
 ```

@@ -3,7 +3,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-deployable_project = Path("src/test/sample/deployable")
+deployable_project = Path("src/test/sample/deployable/libr")
 assert deployable_project.exists()
 
 
@@ -12,7 +12,9 @@ class Test(unittest.TestCase):
         # check that our program provides clean stdout with JSON only
         stdout = subprocess.check_output(
             ["java", "-jar", Path("build/libs/mavence.uber.jar").absolute(),
-             "local", "io.github.rtmigo:libr"],
+             "local",
+             #"io.github.rtmigo:libr"
+             ],
             cwd=deployable_project
         )
         print("stdout:", stdout)
