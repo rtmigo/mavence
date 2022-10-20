@@ -93,7 +93,6 @@ jobs:
         run: python src/test/python/test_uber.py
 
   version-test:
-    needs: [ unit-test, python-test ]
     runs-on: ubuntu-latest
     steps:
     # prevents pushing newer code with an already published version
