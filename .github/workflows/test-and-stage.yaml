@@ -100,7 +100,6 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    strategy:
     steps:
       - uses: actions/checkout@master
       - name: Setup JDK
