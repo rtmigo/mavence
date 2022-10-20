@@ -1,4 +1,4 @@
-# [mavence](https://github.com/rtmigo/mavence) # experimental
+# [mavence](https://github.com/rtmigo/mavence) #experimental
 
 CLI utility for publishing Gradle projects (Kotlin, Java, etc.) to Maven
 Central.
@@ -41,30 +41,105 @@ variables:
 
 | variable             | wtf                                                       |
 |----------------------|-----------------------------------------------------------|
-| `SONATYPE_USERNAME`  | Username for Sonatype JIRA (optionally replaced by token) |
-| `SONATYPE_PASSWORD`  | Password for Sonatype JIRA (optionally replaced by token) |
 | `MAVEN_GPG_KEY`      | Locally generated private key in ASCII armor              |  
 | `MAVEN_GPG_PASSWORD` | Password protecting the private key                       |
+| `SONATYPE_USERNAME`  | Username for Sonatype JIRA (optionally replaced by token) |
+| `SONATYPE_PASSWORD`  | Password for Sonatype JIRA (optionally replaced by token) |
 
-<details><summary>Here where to get them</summary>
+<details><summary>Where to get GPG variables</summary>
 
-There is no document in the universe yet that would describe the process in
-detail, but without imposing too much. So prepare to a dull journey to the dusty
-circles of hell.
+### Generate key
 
-1. You need
-   to [register](https://getstream.io/blog/publishing-libraries-to-mavencentral-2021/#registering-a-sonatype-account)
-   on the [Sonatype Jira](https://issues.sonatype.org/secure/Dashboard.jspa)
-   and chat with bots, until they **verify** that you can publish a package.
-   That gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
-   publishing.
+It gives you `MAVEN_GPG_PASSWORD`.
 
-2. You generate GPG keys in your own terminal. At that point, they are just
-   files. It remains to figure out what are **public**, **private** keys and
-   what is a **password**. The public key must be sent
-   to [a keyserver](https://unix.stackexchange.com/a/692097), and the
-   private and password are to be exported to variables `MAVEN_GPG_KEY`
-   and `MAVEN_GPG_PASSWORD`.
+```bash
+$ gpg --gen-key
+```
+
+`gpg` will interactively prompt you to choose a password for the new key. It is
+this password that should later be placed in the variable `MAVEN_GPG_PASSWORD`.
+
+### See your private key
+
+It gives you `MAVEN_GPG_KEY`.
+
+```bash
+$ gpg --list-keys
+```
+
+```
+pub   rsa3072 2022-10-18 [SC]
+      1292EC426424C9BA0A581EE060C994FDCD3CADBD       << this is the ID
+uid           [ultimate] John Doe <doe@example.com>
+sub   rsa3072 2022-10-18 [E]
+```
+
+```bash
+$ gpg --export-secret-keys --armor 1292EC426424C9BA0A581EE060C994FDCD3CADBD
+```
+
+```
+-----BEGIN PGP PRIVATE KEY BLOCK-----
+
+lQWGBGNOko0BDACzxxMh4EwjlOBRuV94reQglPp5Chzdw4yJHKBYffGGCy27nmde
+Q05nuVbGJvHqv6jF1+zRNMIEKS/Ioa1C4jenEe0j3boGM2IgjHtPq7WuOeSR2ErX
+...
+
+-----END PGP PRIVATE KEY BLOCK-----
+```
+
+Or put it directly to `MAVEN_GPG_KEY` environment variable (Bash):
+
+```bash
+$ MAVEN_GPG_KEY=$(gpg --export-secret-keys --armor 1292EC426424C9BA0A581EE060C994FDCD3CADBD)
+
+$ export MAVEN_GPG_KEY 
+```
+
+### Send the public key to [a keyserver](https://unix.stackexchange.com/a/692097)
+
+You won't come back to this again, but it will be important for the servers when
+publishing the package.
+
+```bash
+$ gpg --list-keys
+```
+
+```
+pub   rsa3072 2022-10-18 [SC]
+      1292EC426424C9BA0A581EE060C994FDCD3CADBD       << this is the ID
+uid           [ultimate] John Doe <doe@example.com>
+sub   rsa3072 2022-10-18 [E]
+```
+
+```bash
+$ gpg --keyserver hkps://keys.openpgp.org --send-keys 1292EC426424C9BA0A581EE060C994FDCD3CADBD
+```
+
+Some servers will just store the key. Some may require prior email verification.
+Some servers disappear. You have to choose the right one for the moment.
+
+
+
+
+</details>
+
+<details><summary>Where to get Sonatype variables</summary>
+
+You need
+to [register](https://getstream.io/blog/publishing-libraries-to-mavencentral-2021/#registering-a-sonatype-account)
+on the [Sonatype Jira](https://issues.sonatype.org/secure/Dashboard.jspa)
+and chat with bots, until they **verify** that you can publish a package.
+That gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
+publishing.
+
+If you have enough nerve for one more step, you
+can [generate tokens](https://central.sonatype.org/publish/manage-user/#generate-token-on-nxrm-servers)
+.
+The tokens also can be placed in the `SONATYPE_USERNAME` and `SONATYPE_PASSWORD`
+. In some circumstances it is safer.
+
+
 
 </details>
 
@@ -94,12 +169,11 @@ publishing {
         create<MavenPublication>("thelib") {
             from(components["java"])
             pom {
-                val repo = "thelib"
-                val owner = "doe"
+                val github = "https://github.com/doe/thelib"
 
-                name.set("thelib")
+                name.set("The Lib")
                 description.set("There are dumber things than copy-pasting")
-                url.set("https://github.com/$owner/$repo")
+                url.set(github)
 
                 developers {
                     developer {
@@ -108,13 +182,13 @@ publishing {
                     }
                 }
                 scm {
-                    connection.set("scm:git://github.com/$owner/$repo.git")
-                    url.set("https://github.com/$owner/$repo")
+                    connection.set(github.replace("https:", "scm:git:") + ".git")
+                    url.set(github)
                 }
                 licenses {
                     license {
                         name.set("Apache 2.0 License")
-                        url.set("https://github.com/$owner/$repo/blob/HEAD/LICENSE")
+                        url.set("$github/blob/HEAD/LICENSE")
                     }
                 }
             }
@@ -187,9 +261,12 @@ myrootproject/
 
 ## Keep in mind
 
-If sending a package fails for any reason, try to edit meta-data.
-Sonatype servers do not return meaningful error responses. They can simply
-return a "server error" code, or accept the package but silently ignore it.
+When publishing, the servers may not return meaningful error responses. They
+often return a generic "500 Internal Server Error" code, or accept the file, but
+never publish it as a maven package.
+
+If publishing a package fails for any reason, the problem may be in the meta
+data. Something does not match with something: package name, authors, signatures.
 
 ## Publishing
 
@@ -235,7 +312,7 @@ This way you can test the package without sending it to Central.
 ## Testing before publishing
 
 Although the utility prints quite a lot, `stdout` remains clean and only
-prints the result as JSON.
+receives the result as JSON.
 
 Bash:
 
