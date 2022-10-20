@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
 
-  unittest:
+  unit-test:
     #needs: [smoketest]
     timeout-minutes: 10
 
@@ -73,8 +73,27 @@ jobs:
           #SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           #SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
 
+  python-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Set up Python
+        uses: actions/setup-python@master
+        with:
+          python-version: '3.10'
+      - name: Setup JDK
+        uses: actions/setup-java@master
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: gradle
+      - name: Build uber jar
+        run: ./gradlew uberJar
+      - name: Run tests
+        run: python src/test/python/test_uber.py        
+
   to-staging:
-    needs: [unittest]
+    needs: [unit-test, python-test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master

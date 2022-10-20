@@ -26,6 +26,17 @@ that creates, i.e. builds a local copy of a Maven package.
 
 </details>
 
+## Install and run
+
+Just get the latest [mavence.jar](https://github.com/rtmigo/mavence/releases/latest/download/mavence.jar) 
+from the [releases page](https://github.com/rtmigo/mavence/releases).
+
+Run with
+
+```bash
+java -jar mavence.jar
+```
+
 ## Setting the environment
 
 Before publishing, you will need to set the following four environment
@@ -59,8 +70,10 @@ should be your own hero's journey into the unknown and chilling.
 
 We still use Gradle as a base as it makes the project compatible.
 
+#### build.gradle.kts
+
 ```kotlin
-// build.gradle.kts
+
 
 plugins {
     id("java-library")
@@ -109,8 +122,9 @@ publishing {
 }
 ```
 
+#### settings.gradle.kts
+
 ```kotlin
-// settings.gradle.kts
 rootProject.name = "mylib"
 ```
 

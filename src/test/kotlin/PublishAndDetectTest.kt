@@ -10,7 +10,7 @@ class PublishAndDetectTest {
     @Test
     fun test(): Unit = runBlocking {
         val f = Paths.get("src/test/sample/deployable")
-            .toGradlew().publishAndDetect(GroupArtifact.parse("io.github.rtmigo:libr"),"earth")
+            .toGradlew().publishAndDetect(GroupArtifact.parse("io.github.rtmigo:libr"),"mylib")
         // тут мы уже знаем, что артефакт в ".m2" был обновлён, причём ровно один артефакт
         f.file.toFile().exists().shouldBeTrue()
         // конвертируя в ArtifactDir мы также убедимся, что в каталоге POM и JAR
