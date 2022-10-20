@@ -26,6 +26,35 @@ local copy of a Maven project.
 
 </details>
 
+## Setting the environment
+
+Before publishing, you will need to set the following four environment
+variables:
+
+| variable             | wtf                                                       |
+|----------------------|-----------------------------------------------------------|
+| `SONATYPE_USERNAME`  | Username for Sonatype JIRA (optionally replaced by token) |
+| `SONATYPE_PASSWORD`  | Password for Sonatype JIRA (optionally replaced by token) |
+| `MAVEN_GPG_KEY`      | Locally generated private key in ASCII armor              |  
+| `MAVEN_GPG_PASSWORD` | Password protecting the private key                       |
+
+<details><summary>Here how to get them</summary>
+
+1. You need to register on the Sonatype site and chat with bots in
+   their JIRA system, until they **verify** that you can publish a package. That
+   gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
+   publishing.
+
+2. You generate GPG keys in your own terminal. At that point, they are just
+   files. It remains to figure out what are **public**, **private** keys and
+   what is a **password**. The public key must be sent to a keyserver, and the
+   private and password must be exported to variables `MAVEN_GPG_KEY`
+   and `MAVEN_GPG_PASSWORD`.
+
+I can't go into more detail as releasing to Maven Central
+should be your own hero's journey.
+</details>
+
 ## Minimal configuration
 
 We still use Gradle as a base as it makes the project compatible.
