@@ -8,13 +8,8 @@ import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.*
 import kotlinx.coroutines.runBlocking
 import maven.*
-import stages.sign.cmdSign
+import stages.sign.*
 import stages.upload.*
-import tools.*
-
-import java.nio.file.*
-
-
 
 
 class Cli : NoOpCliktCommand(

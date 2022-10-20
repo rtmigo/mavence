@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: ISC
  **/
 
-package tools
+package stages.sign
 
 import com.github.pgreze.process.*
 import java.io.*
@@ -20,22 +20,10 @@ value class GpgPassphrase(val string: String)
 @JvmInline
 value class GpgPrivateKey(val string: String)
 
-@OptIn(GpgInternals::class)
-suspend fun signFile(
-    file: Path,
-    key: GpgPrivateKey,
-    phrase: GpgPassphrase,
-    target: Path = file.parent.resolve(file.name + ".asc"),
-) {
-    TempGpg().use {
-        it.importKey(key)
-        it.signFile(file, phrase, target)
-    }
-}
-
-/// Runs GPG with a temporary "homedir", i.e. with a temporary keys database.
-/// We can import keys into it without changing the system
-
+/**
+ * Runs GPG with a temporary "homedir", i.e. with a temporary keys database.
+ * We can import keys into it without changing the system
+ */
 internal class TempGpg : Closeable {
     private val exe: String = "gpg"
 
@@ -101,7 +89,6 @@ internal class TempGpg : Closeable {
                 Regex("\\s+"), " ")
     }
 
-    /// Creates `file.ext.asc` next to `file.ext`.
     suspend fun signFile(
         file: Path,
         passphrase: GpgPassphrase,
@@ -128,51 +115,4 @@ internal class TempGpg : Closeable {
             .unwrap()
         check(target.exists())
     }
-}
-
-private suspend fun canGetTty(): Boolean =
-    process("tty").resultCode == 0
-
-private fun isGpgTtySet() =
-    (System.getenv("GPG_TTY") ?: "").trim().isNotEmpty()
-
-private fun weAreInWindows() =
-    System.getProperty("os.name").startsWith("Windows")
-
-suspend fun requireGpgTtyIfNeeded() {
-    // есть проблема, которая мешает GPG подписывать файлы в Github Actions:
-    // "gpg: signing failed: Inappropriate ioctl for device"
-    //
-    // у неё есть workaround:
-    // https://github.com/keybase/keybase-issues/issues/2798#issue-205008630
-    //
-    // Это описано также в `man gpg-agent`:
-    //
-    // You should always add the following lines to your .bashrc  or  whatever
-    // initialization file is used for all shell invocations:
-    // ```
-    //   GPG_TTY=$(tty)
-    //   export GPG_TTY
-    // ```
-    //
-    // It is important that this environment variable always reflects the out-
-    // put of the tty command.  For W32 systems this option is not required.
-    //
-    // Я пытался сделать это прямо из скрипта, но в Actions не мог выяснить tty:
-    //   1. subprocess.check_output("tty")
-    //   2. os.ttyname(sys.stdout.fileno())
-    // В первом случае получал код ошибки, во втором
-    // "OSError: [Errno 25] Inappropriate ioctl for device"
-    //
-    // В общем, просто требуем, чтобы переменная была определена
-    // Поэтому пока я просто требую, чтобы такая переменная среды была задана
-    // до запуска скрипта.
-    //
-    // !!! впрочем, возможно задачу решит аргумент "--no-tty". Его использует Gradle
-    // https://bit.ly/3Sb4iml
-
-    if (!canGetTty() && !weAreInWindows() && !canGetTty())
-        throw Exception(
-            """Please set GPG_TTY environment variable: 
-               | `export GPG_TTY=${'$'}(tty)`""".trimIndent())
 }
