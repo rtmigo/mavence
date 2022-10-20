@@ -63,7 +63,6 @@ We still use Gradle as a base as it makes the project compatible.
 // build.gradle.kts
 
 plugins {
-    java
     id("java-library")
     id("maven-publish")
 }
