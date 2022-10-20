@@ -6,11 +6,10 @@ plugins {
     kotlin("jvm") version "1.7.20"
     kotlin("plugin.serialization") version "1.7.20"
     application
-
 }
 
 group = "io.github.rtmigo"
-version = "0.1.0" // -SNAPSHOT
+version = "0.1.1"
 
 repositories {
     mavenCentral()
@@ -23,13 +22,13 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0") // testing
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0") // testing
-    testImplementation("io.kotest:kotest-assertions-core:5.5.0")// testing
+    testImplementation("io.kotest:kotest-assertions-core:5.5.1")// testing
 
     implementation("com.github.pgreze:kotlin-process:1.4") // running processes
     implementation("com.github.aballano:mnemonik:2.1.1") // caching function results
 
     implementation("com.github.ajalt.clikt:clikt:3.5.0") // parsing cli args
-    implementation("org.jsoup:jsoup:1.14.3") // parsing xml
+    implementation("org.jsoup:jsoup:1.15.3") // parsing xml
     implementation("org.jline:jline:3.21.0") // terminal size
 
     implementation("org.redundent:kotlin-xml-builder:1.8.0")  // building XML (unused)
@@ -99,6 +98,5 @@ tasks.register<Jar>("uberJar") {
     doLast {
         println("JAR size %.2f MB".format(archiveFile.get().asFile.length() / 1_000_000.0))
         println("Run with: alias ${archiveBaseName.get()}='java -jar ${archiveFile.get()}'")
-        //#println("OR: java -jar ${archiveFile.get()}")
     }
 }
