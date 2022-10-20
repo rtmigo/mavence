@@ -68,6 +68,11 @@ plugins {
     id("maven-publish")
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 group = "io.github.doe"
 version = "0.1.2"
 
@@ -80,7 +85,7 @@ publishing {
                 val owner = "doe"
 
                 name.set("mylib")
-                description.set("Project Description")
+                description.set("There are works even dumber than copy-pasting")
                 url.set("https://github.com/$owner/$repo")
 
                 developers {
@@ -102,6 +107,7 @@ publishing {
             }
         }
     }
+    // 
 }
 ```
 
