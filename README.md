@@ -128,7 +128,7 @@ publishing {
 rootProject.name = "mylib"
 ```
 
-## Running
+## Publishing
 
 ### Publish to Maven Central
 
@@ -156,11 +156,6 @@ java -jar mavence.jar local io.github.doe:mylib
 
 ### Publish to Staging
 
-This will push the package to
-a [temporary remote repository](https://s01.oss.sonatype.org/content/repositories/)
-. This way you can
-test the package without sending it to Central.
-
 Set environment variables `MAVEN_GPG_KEY`, `MAVEN_GPG_PASSWORD`
 , `SONATYPE_USERNAME`, `SONATYPE_PASSWORD` and run:
 
@@ -168,6 +163,34 @@ Set environment variables `MAVEN_GPG_KEY`, `MAVEN_GPG_PASSWORD`
 cd /path/to/mylib
 java -jar mavence.jar stage io.github.doe:mylib 
 ```
+
+This will push the package to
+a [temporary remote repository](https://s01.oss.sonatype.org/content/repositories/).
+This way you can test the package without sending it to Central.
+
+## Testing before publishing
+
+Although the utility prints quite a lot, `stdout` remains clean and only 
+prints the result as JSON.
+
+Bash: 
+```bash
+JSON=$(java -jar mavence.jar local dev.domain:artifactus)
+
+echo $JSON
+```
+Output:
+```json
+{ "group": "dev.domain",
+  "artifact": "artifactus",
+  "version": "1.2.3",
+  "notation": "dev.domain:artifactus:1.2.3",
+  "mavenRepo": "file:///home/doe/.m2" }
+```
+
+Using this data, you can test the package before it is sent.
+
+I usually use Python and [tempground](https://pypi.org/project/tempground/) for such testing.
 
 ## Keep in mind
 

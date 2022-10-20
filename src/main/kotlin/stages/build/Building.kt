@@ -49,7 +49,7 @@ suspend fun cmdLocal(ga: GroupArtifact, isFinal: Boolean = false): MavenArtifact
                     version = nota.version.string,
                     artifact = nota.artifact.string,
                     notation = nota.toString(),
-                    mavenRepo = "file://$m2str"
+                    mavenUrl = "file://$m2str"
                 )
             ))
     }
@@ -63,5 +63,5 @@ private data class BuildStdout(
     val artifact: String,
     val version: String,
     val notation: String,
-    val mavenRepo: String
+    val mavenUrl: String
 )
