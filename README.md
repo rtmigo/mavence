@@ -182,7 +182,7 @@ publishing {
                     }
                 }
                 scm {
-                    connection.set(github.replace("https:", "scm:git:")+".git")
+                    connection.set(github.replace("https:", "scm:git:") + ".git")
                     url.set(github)
                 }
                 licenses {
