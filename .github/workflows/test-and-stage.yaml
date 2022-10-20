@@ -1,0 +1,91 @@
+name: test-and-stage
+
+on:
+  push:
+    branches: [ dev ]
+    paths-ignore:
+      - '**.md'
+      - '**.txt'
+
+concurrency:
+  # subsequently queued workflow run will interrupt previous runs
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+
+  unittest:
+    #needs: [smoketest]
+    timeout-minutes: 10
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [
+          ubuntu-latest,
+          # macos-latest
+        ]
+        jdk-version: [
+          8,
+          # 18
+        ]
+        gradle-version: [
+          '7.5.1',
+          # '7.0.1',
+        ]
+
+
+    #    strategy:
+    #      matrix:
+    #        os: [ ubuntu-latest ]
+    #        jdk-version: [ 8 ]
+    #        gradle-version: [ '7.5.1' ]
+    #        python-version: [ '3.10' ]
+    #        isFull:
+    #          - ${{ contains(github.event.head_commit.message, '!!full') }}
+    #        include:
+    #          - isFull: true
+    #            os: macos-latest
+    #          - isFull: true
+    #            python-version: '3.11.0-rc.2'
+    #          - isFull: true
+    #            jdk-version: 18
+    #          - isFull: true
+    #            gradle-version: '7.0.1'
+
+    steps:
+      - uses: actions/checkout@master
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@master
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Setup JDK
+        uses: actions/setup-java@master
+        with:
+          java-version: ${{ matrix.jdk-version }}
+          distribution: 'temurin'
+          cache: gradle
+      - name: Unit tests
+        run: |
+          export GPG_TTY=$(tty)
+          ./gradlew build
+          #python hap.py test ${{ matrix.gradle-version }}
+        env:
+          MAVEN_GPG_KEY: ${{ secrets.MAVEN_GPG_KEY }}
+          MAVEN_GPG_PASSWORD: ${{ secrets.MAVEN_GPG_PASSWORD }}
+          #SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          #SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+
+  to-staging:
+    needs: [unittest]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Merge current -> staging
+        uses: devmasx/merge-branch@v1.3.1
+        with:
+          type: now
+          target_branch: staging
+          github_token: ${{ github.token }}
+
