@@ -22,27 +22,30 @@ java {
 
 publishing {
     publications {
-        create<MavenPublication>("earth") {
+        create<MavenPublication>("mylib") {
             from(components["java"])
             pom {
+                val repo = "mylib"
+                val owner = "doe"
+
+                name.set("mylib")
+                description.set("There are things even dumber than copy-pasting")
+                url.set("https://github.com/$owner/$repo")
+
                 developers {
                     developer {
-                        name.set("Artsiom iG")
-                        email.set("ortemeo@gmail.com")
-                        //name.set("Slartibartfast")
-                        //email.set("slartibartfast@magrathea.net")
+                        name.set("John Doe")
+                        email.set("doe@sample.com")
                     }
                 }
-                val repo = "precise_kt"
-                //val user "rtmigo"
                 scm {
-                    connection.set("scm:git:git://github.com/rtmigo/$repo.git")
-                    url.set("https://github.com/rtmigo/$repo")
+                    connection.set("scm:git://github.com/$owner/$repo.git")
+                    url.set("https://github.com/$owner/$repo")
                 }
                 licenses {
                     license {
-                        name.set("MIT")
-                        url.set("https://github.com/rtmigo/$repo/blob/HEAD/LICENSE")
+                        name.set("Apache 2.0 License")
+                        url.set("https://github.com/$owner/$repo/blob/HEAD/LICENSE")
                     }
                 }
             }

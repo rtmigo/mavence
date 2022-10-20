@@ -37,7 +37,7 @@ open class Local(help: String="Build, publish to $m2str") : CliktCommand(help = 
     val groupAndArtifact by argument("<artifact>")
 
     override fun run() = runBlocking {
-        cmdLocal(GroupArtifact.parse(groupAndArtifact))
+        cmdLocal(GroupArtifact.parse(groupAndArtifact), isFinal = true)
         Unit
     }
 }
