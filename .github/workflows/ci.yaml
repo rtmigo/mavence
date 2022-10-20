@@ -140,7 +140,7 @@ jobs:
           echo "result=$VERSION" >>$GITHUB_OUTPUT
       - name: Build
         run: |
-          export GPG_TTY=$(tty)
+          #export GPG_TTY=$(tty)
           ./gradlew uberJar
           mv ./build/libs/mavence.uber.jar ./build/libs/mavence.jar
         env:

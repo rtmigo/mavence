@@ -2,6 +2,7 @@ import io.kotest.matchers.booleans.*
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import stages.sign.*
 import tools.*
 import java.nio.file.*
 import java.util.zip.CRC32
