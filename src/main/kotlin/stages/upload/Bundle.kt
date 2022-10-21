@@ -42,4 +42,3 @@ class SignedBundle(val jar: Path, private val tempDir: CloseableTempDir) : Close
         tempDir.close()
     }
 }
-

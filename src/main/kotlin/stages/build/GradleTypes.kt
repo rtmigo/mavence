@@ -6,6 +6,10 @@
 import java.nio.file.Path
 import kotlin.io.path.*
 
+//class AbsPath(src: Path) {
+//    val path: Path = src.absolute()
+//}
+
 @JvmInline
 value class ProjectRootDir(val path: Path) {
     init {
@@ -16,6 +20,7 @@ value class ProjectRootDir(val path: Path) {
 @JvmInline
 value class ArtifactDir(val path: Path) {
     init {
+        require(path.isAbsolute)
         require(
             path.resolve("build.gradle.kts").exists() ||
                 path.resolve("build.gradle").exists()) {

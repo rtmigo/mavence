@@ -190,6 +190,12 @@ suspend fun HttpClient.waitForUri(
 private val json = Json { encodeDefaults = true }
 
 suspend fun HttpClient.promoteToCentral(uri: StagingUri) {
+
+    // иногда тут бывает
+    // Error: Exception in thread "main" java.lang.IllegalStateException: Failed to promote:
+    // 500 Server Error
+    // {"errors":[{"id":"*","msg":"Unhandled: Staging repository is already transitioning: iogithubrtmigo-1183"}]}
+
     eprintHeader("Promoting Staging to Release")
     this.post("https://s01.oss.sonatype.org/service/local/staging/bulk/promote") {
         setBody(
