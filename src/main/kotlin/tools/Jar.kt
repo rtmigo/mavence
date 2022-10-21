@@ -37,7 +37,9 @@ object Jar {
         }
         initialized = true
         if (jarExeCache == null)
-            throw IllegalStateException("JAR not found")
+            throw IllegalStateException("`jar` executable not found")
+        if (!Path(jarExeCache!!).isExecutable())
+            throw IllegalStateException("'$jarExeCache' is not executable")
         return jarExeCache!!
     }
 }
