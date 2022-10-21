@@ -62,13 +62,13 @@ variables:
 
 [Register](https://getstream.io/blog/publishing-libraries-to-mavencentral-2021/#registering-a-sonatype-account)
 on the [Sonatype Jira](https://issues.sonatype.org/secure/Dashboard.jspa)
-and chat with bots, 🤪 until they **verify** that you can publish a package.
+and chat with bots, until they **verify** that you can publish a package.
 That gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
 publishing.
 
 Additionally, you
 can [generate tokens](https://central.sonatype.org/publish/manage-user/#generate-token-on-nxrm-servers)
-to use them instead of the username and password (tokens are safer). The
+to use them *instead* of the username and password. The
 tokens can be placed in the same `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` and
 do not require other changes.
 
