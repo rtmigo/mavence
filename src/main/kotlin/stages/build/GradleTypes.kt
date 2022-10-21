@@ -6,10 +6,6 @@
 import java.nio.file.Path
 import kotlin.io.path.*
 
-//class AbsPath(src: Path) {
-//    val path: Path = src.absolute()
-//}
-
 @JvmInline
 value class ProjectRootDir(val path: Path) {
     init {
@@ -39,6 +35,10 @@ value class BuildGradleFile(val path: Path) {
 @JvmInline
 value class GradlewFile(val path: Path) {
     init {
-        require(path.name == "gradlew" || path.name == "gradlew.bat")
+        require(path.name == "gradlew" || path.name == "gradlew.bat") {
+            "Unexpected filename"
+        }
+        if (path.name == "gradlew")
+            check(path.isExecutable()) { "gradlew is not executable" }
     }
 }
