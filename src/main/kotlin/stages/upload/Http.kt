@@ -35,17 +35,11 @@ private fun insecureHttpLogging() = System.getenv("INSECURE_HTTP_LOGGING") == "1
 fun createClient(user: SonatypeUsername, pass: SonatypePassword): HttpClient =
     HttpClient {
 
-//        install(HttpRequestRetry) {
-//            retryOnServerErrors(maxRetries = 10)
-//            exponentialDelay()
-//            retryOnException(maxRetries = 10) // HttpTimeout выбрасывает исключения
-//        }
-//
-//        install(HttpTimeout) {
-//            this.requestTimeoutMillis = 10*60*1000
-//            this.connectTimeoutMillis = 5*1000
-//            this.socketTimeoutMillis = this.connectTimeoutMillis
-//        }
+        install(HttpRequestRetry) {
+            retryOnServerErrors(maxRetries = 4)
+            exponentialDelay()
+            retryOnException(maxRetries = 4) // HttpTimeout выбрасывает исключения
+        }
 
         install(Logging) {
             logger = object : Logger {
@@ -191,10 +185,14 @@ private val json = Json { encodeDefaults = true }
 
 suspend fun HttpClient.promoteToCentral(uri: StagingUri) {
 
-    // иногда тут бывает
+    // 2022-10 загадочная ошибка:
     // Error: Exception in thread "main" java.lang.IllegalStateException: Failed to promote:
     // 500 Server Error
-    // {"errors":[{"id":"*","msg":"Unhandled: Staging repository is already transitioning: iogithubrtmigo-1183"}]}
+    // {"errors":[
+    //    {"id":"*",
+    //     "msg":"Unhandled: Staging repository is already transitioning: iogithubrtmigo-1183"}]}
+    // Можно бы предположить, что мы пытались сделать promote дважды. Но нет: логи показывают,
+    // мы при первом вызове иногда сразу "already transitioning"
 
     eprintHeader("Promoting Staging to Release")
     this.post("https://s01.oss.sonatype.org/service/local/staging/bulk/promote") {
