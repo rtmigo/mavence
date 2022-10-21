@@ -13,7 +13,7 @@ import kotlin.io.path.*
 
 suspend fun cmdLocal(ga: GroupArtifact, isFinal: Boolean = false): MavenArtifactDir {
     eprintHeader("Publishing to $m2str")
-    val f = Paths.get(".")
+    val f = Paths.get(".").absolute()
         .toGradlew().publishAndDetect(ga,null)
     eprint()
 
@@ -22,7 +22,7 @@ suspend fun cmdLocal(ga: GroupArtifact, isFinal: Boolean = false): MavenArtifact
     fun debugReplace(fn: String) {
         // In case Sonatype freezes or gives uninformative errors, we can try to debug by
         // replacing files one at a time. Normally it does not run
-        val src = Paths.get("...")
+        val src = Paths.get("---")
         println("HACKY REPLACE $fn")
         val srcFile = src.resolve(fn)
         val dstFile = mad.path.resolve(fn)

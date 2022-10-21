@@ -177,8 +177,8 @@ jobs:
           echo "result=$VERSION" >>$GITHUB_OUTPUT
       - name: Build
         run: |
-          #export GPG_TTY=$(tty)
           ./gradlew uberJar
+          java -jar ./build/libs/mavence.uber.jar --version 
           mv ./build/libs/mavence.uber.jar ./build/libs/mavence.jar
         env:
           MAVEN_GPG_KEY: ${{ secrets.MAVEN_GPG_KEY }}
