@@ -16,7 +16,7 @@ the [Signing](https://docs.gradle.org/current/userguide/signing_plugin.html) and
 These tasks are almost unrelated.
 
 By placing publishing logic in a build script, you make the foundation of the
-project complex, big and ugly.
+project complex and ugly.
 
 </details>
 
