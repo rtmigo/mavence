@@ -10,7 +10,6 @@ import java.nio.file.Path
 import kotlin.io.path.*
 
 
-
 @JvmInline
 value class JarFile(val path: Path)
 
@@ -44,6 +43,7 @@ fun MavenUrl.toPomUrl(notation: Notation): URL {
 
 open class ExpectedException(msg: String) : Exception(msg)
 class FailedToParseValueException(value: String) : ExpectedException("Failed to parse '${value}'")
-class ValueException(name: String, value: Any, cause: Throwable? = null): IllegalArgumentException("$name: <$value>", cause)
+class ValueException(name: String, value: Any, cause: Throwable? = null):
+    IllegalArgumentException("$name: <$value>", cause)
 
 
