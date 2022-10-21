@@ -36,7 +36,6 @@ Run:
 java -jar mavence.jar
 ```
 
-
 ### Manually
 
 Just get the
@@ -49,8 +48,6 @@ Run:
 java -jar ~/Downloads/mavence.jar
 ```
 
-
-
 ## Setting the environment
 
 Before publishing, you will need to set the following four environment
@@ -58,10 +55,28 @@ variables:
 
 | variable             | wtf                                                       |
 |----------------------|-----------------------------------------------------------|
-| `MAVEN_GPG_KEY`      | Locally generated private key in ASCII armor              |  
-| `MAVEN_GPG_PASSWORD` | Password protecting the private key                       |
 | `SONATYPE_USERNAME`  | Username for Sonatype JIRA (optionally replaced by token) |
 | `SONATYPE_PASSWORD`  | Password for Sonatype JIRA (optionally replaced by token) |
+| `MAVEN_GPG_KEY`      | Locally generated private key in ASCII armor              |  
+| `MAVEN_GPG_PASSWORD` | Password protecting the private key                       |
+
+<details><summary>Where to get Sonatype variables</summary>
+
+[Register](https://getstream.io/blog/publishing-libraries-to-mavencentral-2021/#registering-a-sonatype-account)
+on the [Sonatype Jira](https://issues.sonatype.org/secure/Dashboard.jspa)
+and chat with bots, 🤪 until they **verify** that you can publish a package.
+That gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
+publishing.
+
+Additionally, you
+can [generate tokens](https://central.sonatype.org/publish/manage-user/#generate-token-on-nxrm-servers)
+to use them instead of the username and password (tokens are safer). The
+tokens can be placed in the same `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` and
+do not require other changes.
+
+**May the Google be with you.**
+
+</details>
 
 <details><summary>Where to get GPG variables</summary>
 
@@ -136,28 +151,6 @@ $ gpg --keyserver hkps://keys.openpgp.org --send-keys 1292EC426424C9BA0A581EE060
 Some servers will just store the key. Some may require prior email verification.
 Some servers disappear. You have to choose the right one for the moment.
 
-
-
-
-</details>
-
-<details><summary>Where to get Sonatype variables</summary>
-
-You need
-to [register](https://getstream.io/blog/publishing-libraries-to-mavencentral-2021/#registering-a-sonatype-account)
-on the [Sonatype Jira](https://issues.sonatype.org/secure/Dashboard.jspa)
-and chat with bots, until they **verify** that you can publish a package.
-That gives you `SONATYPE_USERNAME` and `SONATYPE_PASSWORD` you can use for
-publishing.
-
-If you have enough nerve for one more step, you
-can [generate tokens](https://central.sonatype.org/publish/manage-user/#generate-token-on-nxrm-servers)
-.
-The tokens also can be placed in the `SONATYPE_USERNAME` and `SONATYPE_PASSWORD`
-. In some circumstances it is safer.
-
-
-
 </details>
 
 ## Minimal configuration
@@ -199,7 +192,10 @@ publishing {
                     }
                 }
                 scm {
-                    connection.set(github.replace("https:", "scm:git:") + ".git")
+                    connection.set(
+                        github.replace(
+                            "https:",
+                            "scm:git:") + ".git")
                     url.set(github)
                 }
                 licenses {
@@ -283,7 +279,8 @@ often return a generic "500 Internal Server Error" code, or accept the file, but
 never publish it as a maven package.
 
 If publishing a package fails for any reason, the problem may be in the meta
-data. Something does not match with something: package name, authors, signatures.
+data. Something does not match with something: package name, authors,
+signatures.
 
 ## Publishing
 
@@ -310,6 +307,20 @@ test the package without sending it anywhere.
 cd /path/to/thelib
 java -jar mavence.jar local
 ```
+
+<details><summary>stdout</summary>
+
+```
+{
+  "group": "my.domain",
+  "artifact": "thelib",
+  "version": "0.1.2",
+  "notation": "my.domain:thelib:0.1.2",
+  "mavenRepo": "file:///home/doe/.m2/repository"
+}
+```
+
+</details>
 
 ### Publish to Staging
 

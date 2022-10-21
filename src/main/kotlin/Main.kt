@@ -12,12 +12,15 @@ import stages.build.*
 import stages.sign.*
 import stages.upload.*
 import java.nio.file.*
+import kotlin.io.path.absolute
 
 
 class Cli : NoOpCliktCommand(
     name = "mavence",
     help = "Publishes Gradle projects to Maven Central\n\nSee: https://github.com/rtmigo/mavence#readme"
 ) {
+    private val trace by option("--trace", help = "Show full stack traces on errors").flag()
+
     init {
         versionOption(Build.version) {
             "$commandName $it (${Build.date})\n" +
@@ -26,21 +29,20 @@ class Cli : NoOpCliktCommand(
         }
     }
 
-    override fun run() = Unit
+    override fun run() {
+        currentContext.findOrSetObject { CliConfig(trace = this.trace) }
+    }
 }
 
 private suspend fun gaa(): GroupArtifact {
-    val ad = ArtifactDir(Paths.get("."))
+    val ad = ArtifactDir(Paths.get(".").absolute())
     return GroupArtifact(ad.group(), ad.artifact())
 }
 
-open class Local(help: String="Build, publish to $m2str") : CliktCommand(help = help) {
-    //val groupAndArtifact by argument("<artifact>")
+data class CliConfig(val trace: Boolean)
 
-    override fun run() = runBlocking {
-        //val gw = Paths.get(".").toGradlew()
-        //gw.
-        //val ad = ArtifactDir(Paths.get("."))
+open class Local(help: String = "Build, publish to $m2str") : CliktCommand(help = help) {
+    override fun run() = catchingCommand(this) {
         cmdLocal(gaa(), isFinal = true)
         Unit
     }
@@ -58,7 +60,7 @@ open class Stage(help: String = "Build, sign, publish to OSSRH Staging") :
         "--sonatype-password",
         envvar = "SONATYPE_PASSWORD").required()
 
-    override fun run() = runBlocking {
+    override fun run() = catchingCommand(this) {
         cmdSign(
             cmdLocal(gaa()),
             key = GpgPrivateKey(gpgKey),
@@ -74,7 +76,7 @@ open class Stage(help: String = "Build, sign, publish to OSSRH Staging") :
 }
 
 class Central : Stage(help = "Build, sign, publish to OSSRH Staging, release to Central") {
-    override fun run() = runBlocking {
+    override fun run() = catchingCommand(this) {
         cmdSign(
             cmdLocal(gaa()),
             key = GpgPrivateKey(gpgKey),
@@ -88,6 +90,21 @@ class Central : Stage(help = "Build, sign, publish to OSSRH Staging, release to 
                 signed.content.notation).toRelease(user = user, pass = pass)
         }
     }
+}
+
+fun catchingCommand(cmd: CliktCommand, block: suspend () -> Unit) {
+    try {
+        runBlocking {
+            block()
+        }
+    } catch (e: Exception) {
+        if (cmd.currentContext.findObject<CliConfig>()!!.trace)
+            e.printStackTrace()
+        else
+            System.err.println("ERROR: $e")
+            System.err.println("Run with --trace to see full stack trace.")
+    }
+
 }
 
 fun main(args: Array<String>) {
