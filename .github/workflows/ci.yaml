@@ -24,7 +24,7 @@ jobs:
       matrix:
         os: [
           ubuntu-latest,
-          # macos-latest
+          macos-latest
         ]
         jdk-version: [
           8,
@@ -34,25 +34,6 @@ jobs:
           '7.5.1',
           # '7.0.1',
         ]
-
-
-    #    strategy:
-    #      matrix:
-    #        os: [ ubuntu-latest ]
-    #        jdk-version: [ 8 ]
-    #        gradle-version: [ '7.5.1' ]
-    #        python-version: [ '3.10' ]
-    #        isFull:
-    #          - ${{ contains(github.event.head_commit.message, '!!full') }}
-    #        include:
-    #          - isFull: true
-    #            os: macos-latest
-    #          - isFull: true
-    #            python-version: '3.11.0-rc.2'
-    #          - isFull: true
-    #            jdk-version: 18
-    #          - isFull: true
-    #            gradle-version: '7.0.1'
 
     steps:
       - uses: actions/checkout@master
@@ -161,7 +142,7 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@master
         with:
-          java-version: 17
+          java-version: 8
           distribution: 'temurin'
           cache: gradle
       - name: Get the project version
