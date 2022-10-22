@@ -30,7 +30,7 @@ suspend fun StagingUri.toRelease(
 ) {
     createClient(user, pass).use {
         it.promoteToCentral(this)
-        eprint("HOORAY! We have released the package in Maven Central!")
+        eprint("HOORAY! We have released the package to Maven Central!")
         eprint("The release may take some time.")
     }
 }
