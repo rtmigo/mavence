@@ -88,16 +88,16 @@ private data class StagingRepoCreatedResponse(val repositoryUris: List<String>)
 
 
 fun humanReadableByteCountSI(bytes: Long): String {
-    var bytes = bytes
-    if (-1000 < bytes && bytes < 1000) {
-        return "$bytes B"
+    var bytesVar = bytes
+    if (-1000 < bytesVar && bytesVar < 1000) {
+        return "$bytesVar B"
     }
     val ci: CharacterIterator = StringCharacterIterator("kMGTPE")
-    while (bytes <= -999950 || bytes >= 999950) {
-        bytes /= 1000
+    while (bytesVar <= -999950 || bytesVar >= 999950) {
+        bytesVar /= 1000
         ci.next()
     }
-    return String.format("%.1f %cB", bytes / 1000.0, ci.current())
+    return String.format("%.1f %cB", bytesVar / 1000.0, ci.current())
 }
 
 suspend fun HttpClient.sendToStaging(file: Path, notation: Notation): StagingUri {
