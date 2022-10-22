@@ -13,6 +13,7 @@ import stages.upload.*
 import tools.rethrowingState
 import java.nio.file.*
 import kotlin.io.path.absolute
+import kotlin.system.exitProcess
 
 
 class Cli : NoOpCliktCommand(
@@ -126,8 +127,8 @@ fun catchingCommand(cmd: CliktCommand, block: suspend () -> Unit) {
         else
             System.err.println("ERROR: $e")
         System.err.println("Run with --trace to see full stack trace.")
+        exitProcess(1)
     }
-
 }
 
 fun main(args: Array<String>) {
