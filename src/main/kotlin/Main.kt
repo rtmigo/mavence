@@ -129,7 +129,6 @@ fun catchingCommand(cmd: CliktCommand, block: suspend () -> Unit) {
         System.err.println("Run with --trace to see full stack trace.")
         exitProcess(1)
     }
-
 }
 
 fun main(args: Array<String>) {
