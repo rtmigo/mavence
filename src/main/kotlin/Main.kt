@@ -35,10 +35,14 @@ class Cli : NoOpCliktCommand(
     }
 }
 
-private suspend fun gaa(): GroupArtifact {
-    val ad = ArtifactDir(Paths.get(".").absolute())
-    return GroupArtifact(ad.group(), ad.artifact())
-}
+fun theArtifactDir() = ArtifactDir(Paths.get(".").absolute())
+
+//private suspend fun gaa(): GroupArtifact {
+//    val ad = ArtifactDir(Paths.get(".").absolute())
+//    return GroupArtifact(ad.group(), ad.artifact())
+//}
+
+suspend fun ArtifactDir.toGroupArtifact() = GroupArtifact(this.group(), this.artifact())
 
 data class CliConfig(val trace: Boolean)
 
@@ -58,7 +62,7 @@ open class CheckCentral : CliktCommand(
 
 open class Local(help: String = "Build, publish to $m2str") : CliktCommand(help = help) {
     override fun run() = catchingCommand(this) {
-        cmdLocal(gaa(), isFinal = true)
+        cmdLocal(theArtifactDir(), isFinal = true)
         Unit
     }
 }
@@ -86,7 +90,7 @@ open class Stage(help: String = "Build, sign, publish to OSSRH Staging") :
 
     override fun run() = catchingCommand(this) {
         cmdSign(
-            cmdLocal(gaa()),
+            cmdLocal(theArtifactDir()),
             key = GpgPrivateKey(gpgKey),
             pass = GpgPassphrase(gpgPwd)
         ).use {
@@ -102,7 +106,7 @@ open class Stage(help: String = "Build, sign, publish to OSSRH Staging") :
 class Central : Stage(help = "Build, sign, publish to OSSRH Staging, release to Central") {
     override fun run() = catchingCommand(this) {
         cmdSign(
-            cmdLocal(gaa()),
+            cmdLocal(theArtifactDir()),
             key = GpgPrivateKey(gpgKey),
             pass = GpgPassphrase(gpgPwd)
         ).use { signed ->

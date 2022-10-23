@@ -16,7 +16,7 @@ import com.aballano.mnemonik.memoizeSuspend
 import com.github.pgreze.process.*
 
 import maven.*
-import tools.rethrowingState
+import tools.*
 import java.nio.file.*
 import kotlin.io.path.absolute
 import kotlin.io.path.exists
@@ -205,6 +205,13 @@ suspend fun ArtifactDir.group(): Group = rethrowingState(
 suspend fun ArtifactDir.artifact(): Artifact = rethrowingState(
     { "Failed to detect the Artifact in ${this.path}" },
     { Artifact(cachedProperties(this)["archivesBaseName"]!!) })
+
+suspend fun ArtifactDir.targetCompatibility(): Int = rethrowingState(
+    { "Failed get 'targetCompatibility' from ${this.path}" },
+    { javaVersionToInt(cachedProperties(this)["targetCompatibility"]!!) })
+
+
+
 
 
 data class Dependency(val notation: Notation, val scope: String)
