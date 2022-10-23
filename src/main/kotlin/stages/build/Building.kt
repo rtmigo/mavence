@@ -11,10 +11,10 @@ import tools.*
 import java.nio.file.Paths
 import kotlin.io.path.*
 
-suspend fun cmdLocal(ga: GroupArtifact, isFinal: Boolean = false): MavenArtifactDir {
+suspend fun cmdLocal(ga: ArtifactDir, isFinal: Boolean = false): MavenArtifactDir {
     eprintHeader("Publishing to $m2str")
     val f = Paths.get(".").absolute()
-        .toGradlew().publishAndDetect(ga,null)
+        .toGradlew().publishAndDetect(ga.toGroupArtifact(),null)
     eprint()
 
     val mad = f.toMavenArtifactDir()
@@ -31,7 +31,9 @@ suspend fun cmdLocal(ga: GroupArtifact, isFinal: Boolean = false): MavenArtifact
         srcFile.copyTo(dstFile, true)
     }
 
-    PomXml(mad.asUnsignedFileset().pomFile.readText()).validate()
+    PomXml(mad.asUnsignedFileset().pomFile.readText()).validate(
+        targetCompatibility=ga.targetCompatibility()
+    )
 
     eprint()
     eprint(mad.asUnsignedFileset().pomFile.readText())

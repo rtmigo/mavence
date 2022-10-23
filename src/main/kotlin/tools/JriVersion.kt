@@ -14,3 +14,17 @@ fun jriVersion(): Int {
     }
     return version.toInt()
 }
+
+fun javaVersionToInt(version: String): Int =
+    version.split('.').let {
+        if (it.size==1)
+            it.single().toInt()
+        else if (it.size>=2) {
+            if (it[0]=="1")
+                it[1].toInt()
+            else
+                it[0].toInt()
+        }
+        else
+            throw IllegalArgumentException(version)
+    }

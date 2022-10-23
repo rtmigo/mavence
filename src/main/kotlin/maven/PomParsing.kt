@@ -34,7 +34,7 @@ data class PomXml(val xml: String) {
             throw Exception("POM error: item '$selector'.", e)
         }
 
-    fun validate() {
+    fun validate(targetCompatibility: Int) {
         // Отсутствие некоторых элементов в схеме может привести к тому, что Sonatype Staging будет
         // принимать файл, а потом зависать, так никогда и не делая репозиторий доступным. Это
         // конечно большая загадка, в каких ЕЩЁ случаях он так сделает. Но тут можно хоть что-то
@@ -61,13 +61,13 @@ data class PomXml(val xml: String) {
 
 
         val pomJavaVersion = this.javaVersion()
-        val runningJavaVersion = jriVersion()
-
-        if (pomJavaVersion<runningJavaVersion) {
+//        val runningJavaVersion = jriVersion()
+//
+        if (pomJavaVersion<targetCompatibility) {
             // TODO unit test
-            throw Exception("Currently running Java version is $runningJavaVersion, but " +
+            throw Exception("The targetCompatibility Java version is $targetCompatibility, but " +
                                 "<java.version/> in POM is $pomJavaVersion. " +
-                                "Either compile with older Java or change the " +
+                                "Either target older Java or change the " +
                                 "<java.version/> in POM.")
         }
     }
