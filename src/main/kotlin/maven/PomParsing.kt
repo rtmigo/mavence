@@ -83,6 +83,18 @@ data class PomXml(val xml: String) {
                     .firstOrNull()?.text()?.toInt() })
             ?: 8
 
+//    fun mavenCompilerTarget(): Int = mavenCompiler("maven.compiler.target")
+//
+//    // https://www.baeldung.com/maven-java-version#compiler
+//    private fun mavenCompiler(tag: String): Int =
+//        rethrowingState(
+//            {"POM error: $tag"},
+//            {
+//                projectElement.selectXpath("properties/$tag")
+//                    .firstOrNull()?.text()?.toInt() })
+//            ?: 6
+
+
     fun group() = Group(required("project > groupId"))
 
     fun version() = Version(required("project > version"))
