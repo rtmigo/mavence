@@ -10,10 +10,6 @@ import tools.*
 
 
 data class PomXml(val xml: String) {
-    init {
-        println(xml)
-    }
-
     private val soup = Jsoup.parse(xml)
 
     init {
