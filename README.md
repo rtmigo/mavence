@@ -9,7 +9,6 @@ the [Signing](https://docs.gradle.org/current/userguide/signing_plugin.html) and
 
 <details><summary>Why not publish with plugins?</summary>
 
-
 - Building locally
 - Publishing somewhere
 
@@ -267,19 +266,20 @@ myrootproject/
 
 </details>
 
-
-
 # Publishing
 
 <details><summary>Keep in mind</summary>
 
-When publishing, the servers may not return meaningful error responses. They
-often return a generic "500 Internal Server Error" code, or accept the file, but
-never publish it as a maven package.
+When publishing, the servers may not return meaningful error responses.
 
-If publishing a package fails for any reason, the problem may be in the meta
-data. Something does not match with something: package name, authors,
-signatures.
+They often return a generic "500 Internal Server Error" code, spontaneous
+"403 Forbidden" or accept the file, but never publish it as a maven package.
+
+If publishing a package fails for any reason, sometimes this can be fixed by:
+
+* retrying 
+* retrying later
+* editing your package's metadata
 
 </details>
 
