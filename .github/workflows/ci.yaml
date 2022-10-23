@@ -28,7 +28,7 @@ jobs:
         ]
         jdk-version: [
           8,
-          18
+          19
         ]
         gradle-version: [
           '7.5.1',
@@ -65,7 +65,7 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@master
         with:
-          java-version: 17
+          java-version: 8
           distribution: 'temurin'
           cache: gradle
       - name: Build uber jar
