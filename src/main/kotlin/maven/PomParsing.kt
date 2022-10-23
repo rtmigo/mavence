@@ -6,9 +6,14 @@
 package maven
 
 import org.jsoup.Jsoup
+import tools.*
 
 
 data class PomXml(val xml: String) {
+    init {
+        println(xml)
+    }
+
     private val soup = Jsoup.parse(xml)
 
     init {
@@ -30,7 +35,7 @@ data class PomXml(val xml: String) {
             check(items.size >= 1)
             check(items.all { it.text().isNotBlank() })
         } catch (e: Throwable) {
-            throw Exception("POM problem with item '$selector'.", e)
+            throw Exception("POM error: item '$selector'.", e)
         }
 
     fun validate() {
@@ -56,7 +61,31 @@ data class PomXml(val xml: String) {
         requireAtLeastOne("project > licenses > license > url")
         requireAtLeastOne("project > developers > developer > name")
         requireAtLeastOne("project > developers > developer > email")
+
+
+
+        val pomJavaVersion = this.javaVersion()
+        val runningJavaVersion = jriVersion()
+
+        if (pomJavaVersion<runningJavaVersion) {
+            // TODO unit test
+            throw Exception("Currently running Java version is $runningJavaVersion, but " +
+                                "<java.version/> in POM is $pomJavaVersion. " +
+                                "Either compile with older Java or change the " +
+                                "<java.version/> in POM.")
+        }
     }
+
+    private val projectElement by lazy {soup.selectXpath("/html/body/project").single() }
+
+    /** Returns `properties > java.version` converted to `Int` or 8. */
+    fun javaVersion(): Int = // TODO unit test
+        rethrowingState(
+            {"POM error: java.version"},
+            {
+                projectElement.selectXpath("properties/java.version")
+                    .firstOrNull()?.text()?.toInt() })
+            ?: 8
 
     fun group() = Group(required("project > groupId"))
 
